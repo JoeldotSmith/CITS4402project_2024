@@ -16,7 +16,6 @@ function visualizeMRI()
     end
     
     % Initialize variables
-    current_file_index = 1;
     current_slice = 1;
     display_tumor_mask = false;
     
@@ -24,32 +23,22 @@ function visualizeMRI()
     fig = figure('Name', 'MRI Visualization Tool', 'Position', [100, 100, 800, 600]);
     
     % UI elements
-    file_dropdown = uicontrol('Style', 'popupmenu', 'String', {files.name}, ...
-        'Position', [20, 550, 200, 30], 'Callback', @fileDropdownCallback);
-    
-    channel_dropdown = uicontrol('Style', 'popupmenu', 'String', {'Channel 1', 'Channel 2', 'Channel 3'}, ...
-        'Position', [250, 550, 150, 30], 'Callback', @channelDropdownCallback);
-    
-    tumor_checkbox = uicontrol('Style', 'checkbox', 'String', 'Show Tumor Mask', ...
-        'Position', [420, 550, 150, 30], 'Callback', @tumorCheckboxCallback);
-    
-    slice_slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', 100, 'Value', 1, ...
-        'SliderStep', [1/(num_files-1), 10/(num_files-1)], 'Position', [600, 550, 150, 30], ...
+    slice_slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', num_files, 'Value', 1, ...
+        'SliderStep', [1/(num_files-1), 10/(num_files-1)], 'Position', [20, 550, 750, 30], ...
         'Callback', @sliceSliderCallback);
     
     slice_text = uicontrol('Style', 'text', 'String', 'Slice:', ...
-        'Position', [560, 550, 40, 30]);
+        'Position', [10, 550, 40, 30]);
+    
+    tumor_checkbox = uicontrol('Style', 'checkbox', 'String', 'Show Tumor Mask', ...
+        'Position', [650, 10, 150, 30], 'Callback', @tumorCheckboxCallback);
     
     % Display initial MRI slice
     displaySlice();
     
     % Callback functions
-    function fileDropdownCallback(src, ~)
-        current_file_index = src.Value;
-        displaySlice();
-    end
-
-    function channelDropdownCallback(src, ~)
+    function sliceSliderCallback(src, ~)
+        current_slice = round(src.Value);
         displaySlice();
     end
 
@@ -58,28 +47,20 @@ function visualizeMRI()
         displaySlice();
     end
 
-    function sliceSliderCallback(src, ~)
-        current_slice = round(src.Value);
-        displaySlice();
-    end
-
     function displaySlice()
         % Load MRI data and tumor mask
-        file_path = fullfile(directory, files(current_file_index).name);
+        file_path = fullfile(directory, files(current_slice).name);
         mri_data = h5read(file_path, '/mri_data');
         tumor_mask = h5read(file_path, '/tumor_mask');
         
-        % Get selected channel
-        channel_index = channel_dropdown.Value;
-        
         % Display MRI slice
-        imshow(mri_data(:,:,current_slice,channel_index), []);
-        title(sprintf('MRI Slice %d (Channel %d)', current_slice, channel_index));
+        imshow(mri_data, []);
+        title(sprintf('MRI Slice %d', current_slice));
         
         % Overlay tumor mask if selected
         if display_tumor_mask
             hold on;
-            contour(tumor_mask(:,:,current_slice), 'r');
+            contour(tumor_mask, 'r');
             hold off;
         end
     end
