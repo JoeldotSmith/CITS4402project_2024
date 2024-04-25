@@ -66,8 +66,8 @@ function visualizeMRI()
     function displaySlice()
         % Load MRI data and tumor mask
         file_path = fullfile(directory, files(current_file_index).name);
-        mri_data = h5read(file_path, '/mri_data');
-        tumor_mask = h5read(file_path, '/tumor_mask');
+        mri_data = h5read(file_path, '/volume_1_slice_0.h5');
+        tumor_mask = h5read(file_path, '/volume_1_slice_1.h5');
         
         % Get selected channel
         channel_index = channel_dropdown.Value;
