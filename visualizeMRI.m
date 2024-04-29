@@ -1,68 +1,116 @@
-function visualizeMRI()
+function visualizeMRI
+    % Create the main figure window
+    fig = uifigure('Name', 'MRI Analyzer', 'Position', [100 100 800 500]);
 
-    % Select directory containing H5 files
-    directory = uigetdir('Select directory containing H5 files');
-    if directory == 0
-        disp('No directory selected. Exiting...');
-        return;
-    end
+    % Create UI components
+    loadDirButton = uibutton(fig, 'Text', 'Load Slice Directory', 'Position', [50 450 150 30], 'ButtonPushedFcn', @loadSliceDirectory);
+    channelDropdown = uidropdown(fig, 'Items', {'T1', 'T1Gd', 'T2', 'T2-FLAIR'}, 'Position', [250 450 100 30], 'ValueChangedFcn', @changeChannel);
+    annotationDropdown = uidropdown(fig, 'Items', {'On', 'Off'}, 'Position', [400 450 100 30], 'ValueChangedFcn', @toggleAnnotation);
+    sliceSlider = uislider(fig, 'Limits', [1 154], 'Position', [50 400 700 3], 'ValueChangedFcn', @changeSlice);
+    conventionalButton = uibutton(fig, 'Text', 'Extract Conventional Features', 'Position', [50 350 200 30], 'ButtonPushedFcn', @extractConventionalFeatures);
+    radiomicButton = uibutton(fig, 'Text', 'Extract Radiomic Features', 'Position', [300 350 200 30], 'ButtonPushedFcn', @extractRadiomicFeatures);
     
-    % Load H5 files
-    files = dir(fullfile(directory, '*.h5'));
-    num_files = numel(files);
-    if num_files == 0
-        disp('No H5 files found in selected directory. Exiting...');
-        return;
-    end
+    % Add a UIAxes component for displaying the image
+    ax = uiaxes(fig, 'Position', [100 100 600 250]);
     
-    % Initialize variables
-    current_slice = 1;
-    display_tumor_mask = false;
-    
-    % Create figure
-    fig = figure('Name', 'MRI Visualization Tool', 'Position', [100, 100, 800, 600]);
-    
-    % UI elements
-    slice_slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', num_files, 'Value', 1, ...
-        'SliderStep', [1/(num_files-1), 10/(num_files-1)], 'Position', [20, 550, 750, 30], ...
-        'Callback', @sliceSliderCallback);
-    
-    slice_text = uicontrol('Style', 'text', 'String', 'Slice:', ...
-        'Position', [10, 550, 40, 30]);
-    
-    tumor_checkbox = uicontrol('Style', 'checkbox', 'String', 'Show Tumor Mask', ...
-        'Position', [650, 10, 150, 30], 'Callback', @tumorCheckboxCallback);
-    
-    % Display initial MRI slice
-    displaySlice();
+    % Define variables
+    currentDirectory = '';
+    currentChannel = 'T1';
+    currentSlice = 1;
+    currentVolume = 1;  % Initialize currentVolume
     
     % Callback functions
-    function sliceSliderCallback(src, ~)
-        current_slice = round(src.Value);
-        displaySlice();
-    end
-
-    function tumorCheckboxCallback(src, ~)
-        display_tumor_mask = src.Value;
-        displaySlice();
-    end
-
-    function displaySlice()
-        % Load MRI data and tumor mask
-        file_path = fullfile(directory, files(current_slice).name);
-        mri_data = h5read(file_path, '/mri_data');
-        tumor_mask = h5read(file_path, '/tumor_mask');
-        
-        % Display MRI slice
-        imshow(mri_data, []);
-        title(sprintf('MRI Slice %d', current_slice));
-        
-        % Overlay tumor mask if selected
-        if display_tumor_mask
-            hold on;
-            contour(tumor_mask, 'r');
-            hold off;
+    function loadSliceDirectory(~, ~)
+        % Implement functionality to load directory
+        directory = uigetdir();
+        if directory == 0
+            % User cancelled
+            return;
         end
+        
+        % Process the directory
+        disp(['Selected directory: ' directory]);
+        currentDirectory = directory;
+        
+        % Extract volume number from the directory name
+        [~, currentVolumeStr, ~] = fileparts(directory);
+        currentVolume = str2double(strrep(currentVolumeStr, 'volume_', ''));
+        
+        updateImages(); % Update images after directory is loaded
     end
+
+    function changeChannel(~, ~)
+        % Implement functionality to change displayed channel
+        currentChannel = channelDropdown.Value;
+        disp(['Channel changed to: ' currentChannel]);
+        updateImages();
+    end
+
+    function toggleAnnotation(~, ~)
+        % Implement functionality to toggle tumor annotation
+        disp('Annotation toggled');
+        updateImages();
+    end
+
+    function changeSlice(~, ~)
+        % Implement functionality to change displayed slice
+        currentSlice = round(sliceSlider.Value);
+        disp(['Slice changed to: ' num2str(currentSlice)]);
+        updateImages();
+    end
+
+    function extractConventionalFeatures(~, ~)
+        % Implement functionality to extract conventional features
+        disp('Conventional features extracted');
+    end
+
+    function extractRadiomicFeatures(~, ~)
+        % Implement functionality to extract radiomic features
+        disp('Radiomic features extracted');
+    end
+
+function updateImages()
+    % Implement functionality to update displayed images
+    if isempty(currentDirectory)
+        disp('No directory selected.');
+        return;
+    end
+
+    % Construct the filename based on current volume and slice
+    filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
+
+    % Check if the file exists
+    if ~exist(filename, 'file')
+        disp(['File not found: ' filename]);
+        return;
+    end
+
+    try
+        % Read the image data from the HDF5 file
+        imageData = h5read(filename, '/image');
+
+        % Display the size and class of the loaded image data
+        disp(['Loaded image data size: ' num2str(size(imageData))]);
+        disp(['Image data class: ' class(imageData)]);
+
+        % Display the selected channel in the UIAxes
+        channelIndex = getChannelIndex(currentChannel);
+        imshow(squeeze(imageData(channelIndex, :, :)), 'Parent', ax);
+        colormap(ax, gray);
+        axis(ax, 'image');
+        title(ax, ['Channel ' num2str(channelIndex)]);
+    catch ME
+        disp(['Error reading HDF5 file: ' ME.message]);
+        return;
+    end
+end
+
+
+
+function index = getChannelIndex(channel)
+    % Define channel indices
+    channelIndices = containers.Map({'T2-FLAIR', 'T1', 'T1Gd', 'T2'}, {1, 2, 3, 4});
+    index = channelIndices(channel);
+end
 
 end
