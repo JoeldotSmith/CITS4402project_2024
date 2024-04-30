@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"name": "project",
+			"path": "."
+		},
+		{
+			"name": "archive",
+			"path": "../../../Downloads/archive"
+		}
+	],
+    "settings": {
+        "gitdoc.enabled": true
+    }
+}
