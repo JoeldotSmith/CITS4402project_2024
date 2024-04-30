@@ -6,7 +6,7 @@ function visualizeMRI
     loadDirButton = uibutton(fig, 'Text', 'Load Slice Directory', 'Position', [50 450 150 30], 'ButtonPushedFcn', @loadSliceDirectory);
     channelDropdown = uidropdown(fig, 'Items', {'T1', 'T1Gd', 'T2', 'T2-FLAIR'}, 'Position', [250 450 100 30], 'ValueChangedFcn', @changeChannel);
     annotationDropdown = uidropdown(fig, 'Items', {'On', 'Off'}, 'Position', [400 450 100 30], 'ValueChangedFcn', @toggleAnnotation);
-    sliceSlider = uislider(fig, 'Limits', [1 154], 'Position', [50 400 700 3], 'Value', 1); % Change here
+    sliceSlider = uislider(fig, 'Limits', [1 154], 'Position', [50 400 700 3], 'ValueChangingFcn', @updateSlice); % Change here
     conventionalButton = uibutton(fig, 'Text', 'Extract Conventional Features', 'Position', [50 350 200 30], 'ButtonPushedFcn', @extractConventionalFeatures);
     radiomicButton = uibutton(fig, 'Text', 'Extract Radiomic Features', 'Position', [300 350 200 30], 'ButtonPushedFcn', @extractRadiomicFeatures);
     
@@ -104,14 +104,14 @@ function visualizeMRI
         index = channelIndices(channel);
     end
 
-    % Create listener for slider value change
-    addlistener(sliceSlider,'ValueChanged',@(hObject, event) updateSlice());
+    % Create timer object for updating the slice
+    sliceTimer = timer('ExecutionMode', 'fixedRate', 'Period', 0.1, 'TimerFcn', @(~,~) updateImages());
 
-    % Callback function to update slice value
-    function updateSlice()
+    % Callback function for updating slice while slider is being dragged
+    function updateSlice(~, ~)
+        stop(sliceTimer); % Stop the timer to prevent interference
         currentSlice = round(sliceSlider.Value);
-        disp(['Slice changed to: ' num2str(currentSlice)]);
-        updateImages();
+        start(sliceTimer); % Restart the timer
     end
 
 end
