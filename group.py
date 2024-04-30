@@ -1,3 +1,6 @@
+# groups the volume foles in the folder path by volume number
+
+
 import os
 import re
 import shutil
