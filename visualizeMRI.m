@@ -102,8 +102,12 @@ function visualizeMRI
     
             % Overlay masks on the image
             for i = 1:numel(colors)
-                mask = squeeze(maskData(i, :, :));
-                contour(ax, mask, colors{i}, 'LineWidth', 1); % Overlay mask contour with specified color
+                try
+                    mask = squeeze(maskData(i, :, :));
+                    contour(ax, mask, colors{i}, 'LineWidth', 1); % Overlay mask contour with specified color
+                catch
+                    disp(['Error reading mask data for mask ' num2str(i)]);
+                end
             end
     
             hold(ax, 'off'); % Release the hold on the current axes
