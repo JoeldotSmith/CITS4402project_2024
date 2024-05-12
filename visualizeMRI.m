@@ -167,11 +167,15 @@ function visualizeMRI
                         end
 
                         % gets Max diameter of tumor 
-                        % props = regionprops(mask, 'MajorAxisLength');
-                        % if ~isempty(props)
-                        %     diameters = [props.MajorAxisLength];
-                        %     maxTumorDiameterCount = max(maxTumorDiameterCount, max(diameters));
-                        % end
+                        try
+                            props = regionprops(mask, 'MajorAxisLength');
+                            if ~isempty(props)
+                                diameters = [props.MajorAxisLength];
+                                maxTumorDiameterCount = max(maxTumorDiameterCount, max(diameters));
+                            end
+                        catch ME
+                            disp(['Error calculating tumor diameter: ' ME.message]);
+                        end
 
 
 
