@@ -167,15 +167,9 @@ function visualizeMRI
                         end
 
                         % gets Max diameter of tumor 
-                        try
-                            props = regionprops(mask, 'MajorAxisLength');
-                            if ~isempty(props)
-                                diameters = [props.MajorAxisLength];
-                                maxTumorDiameterCount = max(maxTumorDiameterCount, max(diameters));
-                            end
-                        catch ME
-                            disp(['Error calculating tumor diameter: ' ME.message]);
-                        end
+                        [maxDiameter, ~] = calculateMaxDiameter(mask);
+                        maxTumorDiameterCount = max(maxTumorDiameterCount, maxDiameter);
+                        
 
 
 
@@ -207,6 +201,23 @@ function visualizeMRI
             maxTumorArea = -1;
             maxTumorDiameter = -1;
             outerLayerInvolvement = -1;
+        end
+        function [maxDiameter, diameterImage] = calculateMaxDiameter(mask)
+            % Calculate distance transform of the binary mask
+            distTransform = bwdist(~mask);
+        
+            % Find the two farthest points in the distance transform
+            [~, idx] = max(distTransform(:));
+            [row1, col1] = ind2sub(size(distTransform), idx);
+        
+            % Use imfindcircles to find the circle with largest radius that fits within the tumor
+            [centers, radii] = imfindcircles(mask, [round(max(distTransform(:))) - 1, round(max(distTransform(:))) + 1]);
+            [~, idx] = max(radii);
+            maxRadius = radii(idx);
+        
+            % Calculate the diameter
+            maxDiameter = 2 * maxRadius;
+            diameterImage = distTransform;
         end
     end
 end
