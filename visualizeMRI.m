@@ -17,9 +17,9 @@ function visualizeMRI
     ax = uiaxes(fig, 'Position', [100 100 600 250]);
 
     % Add UI labels for displaying calculated features
-    maxTumorAreaLabel = uilabel(fig, 'Text', '', 'Position', [700 400 100 30]);
-    maxTumorDiameterLabel = uilabel(fig, 'Text', '', 'Position', [700 350 100 30]);
-    outerLayerInvolvementLabel = uilabel(fig, 'Text', '', 'Position', [700 300 100 30]);
+    maxTumorAreaLabel = uilabel(fig, 'Text', '', 'Position', [50 50 200 15]);
+    maxTumorDiameterLabel = uilabel(fig, 'Text', '', 'Position', [50 30 200 15]);
+    outerLayerInvolvementLabel = uilabel(fig, 'Text', '', 'Position', [50 10 200 15]);
 
     % Define variables
     currentDirectory = '';
