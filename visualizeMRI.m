@@ -140,6 +140,12 @@ function visualizeMRI
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
         try 
+            maxTumorArea = 0;
+            maxTumorDiameter = 0;
+            outerLayerInvolvement = 0;
+            sliceID = 0;
+
+
             % Loop through all slices to find the slice with the largest tumor area
             for i = 1:154
                 try
