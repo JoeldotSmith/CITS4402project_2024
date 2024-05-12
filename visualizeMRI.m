@@ -97,10 +97,13 @@ function visualizeMRI
             axis(ax, 'image');
             hold(ax, 'on'); % Hold the current axes for overlaying the mask
     
+            % Define colors for masks
+            colors = {'r', 'g', 'b'}; % Assuming there are 3 masks
+    
             % Overlay masks on the image
-            for i = 1:3 % Assuming there are 3 masks
+            for i = 1:numel(colors)
                 mask = squeeze(maskData(i, :, :));
-                contour(ax, mask, 'r', 'LineWidth', 1); % Overlay mask contour in red
+                contour(ax, mask, colors{i}, 'LineWidth', 1); % Overlay mask contour with specified color
             end
     
             hold(ax, 'off'); % Release the hold on the current axes
@@ -114,8 +117,6 @@ function visualizeMRI
             return;
         end
     end
-    
-    
 
     function index = getChannelIndex(channel)
         % Define channel indices
