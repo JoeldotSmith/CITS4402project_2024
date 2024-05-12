@@ -139,30 +139,26 @@ function visualizeMRI
     end
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures()
-        % Calculate Maximum Tumor Area
-        maxTumorArea = 0;
-        for slice = 1:154 % Assuming 154 slices
-            mask = h5read(filename, '/mask', [1 1 slice], [512 512 1]); % Assuming mask dimensions are 512x512
-            tumorArea = sum(mask(:)); % Count tumorous pixels
-            maxTumorArea = max(maxTumorArea, tumorArea);
+        try 
+            % Read the mask data from the HDF5 file
+            filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
+            if ~exist(filename, 'file')
+                disp(['File not found: ' filename]);
+                return;
+            end
+            maskData = h5read(filename, '/mask');
+            % Count all the pixels in the mask
+            mask = squeeze(maskData(1, :, :));
+            tumorArea = sum(mask(:));
+            maxTumorArea = tumorArea;
+            maxTumorDiameter = 1;
+            outerLayerInvolvement = 1;
+
+        catch ME
+            disp(['Error reading mask data: ' ME.message]);
+            maxTumorArea = -1;
+            maxTumorDiameter = -1;
+            outerLayerInvolvement = -1;
         end
-        maxTumorDiameter = 0;
-        outerLayerInvolvement = 0;
-        
-        % Calculate Maximum Tumor Diameter
-        % maxTumorDiameter = 0;
-        % for slice = 1:154 % Assuming 154 slices
-        %     mask = h5read(filename, '/mask', [1 1 slice], [512 512 1]); % Assuming mask dimensions are 512x512
-        %     props = regionprops(mask, 'MajorAxisLength'); % Get major axis length of tumor components
-        %     if ~isempty(props)
-        %         maxTumorDiameter = max(maxTumorDiameter, max([props.MajorAxisLength]));
-        %     end
-        % end
-        
-        % % Calculate Outer Layer Involvement
-        % outerLayerThickness = 5; % Constant thickness of outer layer
-        % outerLayerPixels = outerLayerThickness * 512 * 154; % Assuming mask dimensions are 512x512 and 154 slices
-        % tumorPixels = sum(h5read(filename, '/mask'), 'all'); % Total tumor pixels
-        % outerLayerInvolvement = (tumorPixels / outerLayerPixels) * 100;
     end
 end
