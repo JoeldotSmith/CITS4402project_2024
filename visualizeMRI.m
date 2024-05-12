@@ -92,7 +92,7 @@ function visualizeMRI
             % Display the selected channel in the UIAxes
             channelIndex = getChannelIndex(currentChannel);
             imshow(squeeze(imageData(channelIndex, :, :)), 'Parent', ax);
-            colormap(ax, gray);
+            % colormap(ax, gray);
             axis(ax, 'image');
             channelIndex = channelIndex - 1;
             if channelIndex == 0
