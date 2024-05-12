@@ -92,19 +92,18 @@ function visualizeMRI
     
             % Display the selected channel in the UIAxes
             channelIndex = getChannelIndex(currentChannel);
-            imshow(squeeze(imageData(channelIndex, :, :)), 'Parent', ax);
+            imagesc(ax, squeeze(imageData(channelIndex, :, :))); % Display image
+            colormap(ax, gray);
+            axis(ax, 'image');
             hold(ax, 'on'); % Hold the current axes for overlaying the mask
-            
+    
             % Overlay masks on the image
             for i = 1:3 % Assuming there are 3 masks
                 mask = squeeze(maskData(i, :, :));
-                contour(mask, 'r', 'LineWidth', 1); % Overlay mask contour in red
+                contour(ax, mask, 'r', 'LineWidth', 1); % Overlay mask contour in red
             end
-            
+    
             hold(ax, 'off'); % Release the hold on the current axes
-            
-            colormap(ax, gray);
-            axis(ax, 'image');
             channelIndex = channelIndex - 1;
             if channelIndex == 0
                 channelIndex = 4;
@@ -115,6 +114,7 @@ function visualizeMRI
             return;
         end
     end
+    
     
 
     function index = getChannelIndex(channel)
