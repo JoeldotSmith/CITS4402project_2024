@@ -61,37 +61,25 @@ function visualizeMRI
     end
 
     function extractConventionalFeatures(~, ~)
-        % Implement functionality to extract conventional features
-        disp('Extracting conventional features...');
+        disp('Extracting conventional features...');        
+        [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures();
         
-        % Calculate maximum tumor area, maximum tumor diameter, and outer layer involvement
-        % [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures();
-        maxTumorArea = 1000;
-        maxTumorDiameter = 50;
-        outerLayerInvolvement = 10; % Dummy values for demonstration 
-        
-        % Display calculated features
         maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea)];
         maxTumorDiameterLabel.Text = ['Max Tumor Diameter: ' num2str(maxTumorDiameter)];
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
     end
 
     function extractRadiomicFeatures(~, ~)
-        % Implement functionality to extract radiomic features
         disp('Radiomic features extracted');
     end
 
     function updateImages()
-        % Implement functionality to update displayed images
         if isempty(currentDirectory)
             disp('No directory selected.');
             return;
         end
-    
-        % Construct the filename based on current volume and slice
+
         filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
-    
-        % Check if the file exists
         if ~exist(filename, 'file')
             disp(['File not found: ' filename]);
             return;
