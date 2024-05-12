@@ -44,7 +44,10 @@ function visualizeMRI
 
     function changeChannel(~, ~)
         % Implement functionality to change displayed channel
-        currentChannel = channelDropdown.Value;
+        currentChannel = channelDropdown.Value - 1;
+        if currentChannel == 0
+            currentChannel = 4;
+        end
         disp(['Channel changed to: ' currentChannel]);
         updateImages();
     end
