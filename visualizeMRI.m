@@ -141,6 +141,7 @@ function visualizeMRI
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures()
         try 
             % Read the mask data from the HDF5 file
+            tumorAreaCount = 0;
             for i = 1:154
                 try
                     filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
@@ -150,18 +151,20 @@ function visualizeMRI
                     end
                     maskData = h5read(filename, '/mask');
                     mask = squeeze(maskData(1, :, :));
-                    tumorArea = sum(mask(:));
-                    maxTumorArea = tumorArea;
-                    maxTumorDiameter = 1;
-                    outerLayerInvolvement = 1;
+                    tumorAreaCount = tumorAreaCount + sum(mask(:));
+                    
                 catch ME
                     disp(['Error reading mask data: ' ME.message]);
                     maxTumorArea = -1;
                     maxTumorDiameter = -1;
                     outerLayerInvolvement = -1;
+                    return;
                 end
 
             end
+            maxTumorArea = tumorAreaCount;
+            maxTumorDiameter = 0;
+            outerLayerInvolvement = 0;
             
 
         catch ME
