@@ -170,16 +170,7 @@ function visualizeMRI
 
 
                 % gets Max diameter of tumor
-                for j = 1:3
-                    mask = squeeze(maskData(j, :, :));
-                    [rows, cols] = find(mask);
-                    if ~isempty(rows)
-                        diameter = max(pdist2([rows, cols]));
-                        if diameter > maxTumorDiameterCount
-                            maxTumorDiameterCount = diameter;
-                        end
-                    end
-                end
+                
 
 
 
