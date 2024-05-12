@@ -71,27 +71,38 @@ function visualizeMRI
             disp('No directory selected.');
             return;
         end
-
+    
         % Construct the filename based on current volume and slice
         filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
-
+    
         % Check if the file exists
         if ~exist(filename, 'file')
             disp(['File not found: ' filename]);
             return;
         end
-
+    
         try
             % Read the image data from the HDF5 file
             imageData = h5read(filename, '/image');
-
+            maskData = h5read(filename, '/mask'); % Load mask data
+    
             % Display the size and class of the loaded image data
             disp(['Loaded image data size: ' num2str(size(imageData))]);
             disp(['Image data class: ' class(imageData)]);
-
+    
             % Display the selected channel in the UIAxes
             channelIndex = getChannelIndex(currentChannel);
             imshow(squeeze(imageData(channelIndex, :, :)), 'Parent', ax);
+            hold(ax, 'on'); % Hold the current axes for overlaying the mask
+            
+            % Overlay masks on the image
+            for i = 1:3 % Assuming there are 3 masks
+                mask = squeeze(maskData(i, :, :));
+                contour(mask, 'r', 'LineWidth', 1); % Overlay mask contour in red
+            end
+            
+            hold(ax, 'off'); % Release the hold on the current axes
+            
             colormap(ax, gray);
             axis(ax, 'image');
             channelIndex = channelIndex - 1;
@@ -104,6 +115,7 @@ function visualizeMRI
             return;
         end
     end
+    
 
     function index = getChannelIndex(channel)
         % Define channel indices
