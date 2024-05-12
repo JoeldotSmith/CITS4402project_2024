@@ -1,5 +1,5 @@
 function visualizeMRI
-        % Create the main figure window
+    % Create the main figure window
     fig = uifigure('Name', 'MRI Analyzer', 'Position', [100 100 800 500]);
 
     % Create UI components
@@ -9,7 +9,7 @@ function visualizeMRI
     annotationDropdownLabel = uilabel(fig, 'Text', 'Annotation:', 'Position', [400 480 80 15]);
     annotationDropdown = uidropdown(fig, 'Items', {'On', 'Off'}, 'Position', [400 450 100 30], 'ValueChangedFcn', @toggleAnnotation);
     sliceSliderLabel = uilabel(fig, 'Text', 'Slice:', 'Position', [50 415 50 15]);
-    sliceSlider = uislider(fig, 'Limits', [0 154], 'Position', [110 410 640 3], 'Value', 1, 'ValueChangedFcn', @updateSlice); % Change here
+    sliceSlider = uislider(fig, 'Limits', [0 154], 'Position', [110 410 640 3], 'Value', 1); % Change here
     conventionalButton = uibutton(fig, 'Text', 'Extract Conventional Features', 'Position', [50 350 200 30], 'ButtonPushedFcn', @extractConventionalFeatures);
     radiomicButton = uibutton(fig, 'Text', 'Extract Radiomic Features', 'Position', [300 350 200 30], 'ButtonPushedFcn', @extractRadiomicFeatures);
 
@@ -107,11 +107,15 @@ function visualizeMRI
         index = channelIndices(channel);
     end
 
+    % Create listener for slider value change
+    addlistener(sliceSlider,'ValueChange',@(hObject, event) updateSlice());
+
     % Callback function to update slice value
-    function updateSlice(src, ~)
-        currentSlice = round(src.Value);
+    function updateSlice()
+        currentSlice = round(sliceSlider.Value);
         disp(['Slice changed to: ' num2str(currentSlice)]);
         updateImages();
     end
 
 end
+
