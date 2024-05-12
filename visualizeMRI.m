@@ -151,7 +151,7 @@ function visualizeMRI
                     end
                     maskData = h5read(filename, '/mask');
                     mask = squeeze(maskData(1, :, :));
-                    tumorAreaCount = tumorAreaCount + sum(mask(:));
+                    tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
                     
                 catch ME
                     disp(['Error reading mask data: ' ME.message]);
