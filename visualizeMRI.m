@@ -164,9 +164,7 @@ function visualizeMRI
                     end
 
                     % get max diameter of tumor on each slice and set maxTumorDiameterCount
-                    [B,L] = bwboundaries(mask, 'noholes');
-                    stats = regionprops(L, 'MajorAxisLength');
-                    maxTumorDiameterCount = max(maxTumorDiameterCount, stats.MajorAxisLength);
+                    
 
                 end
                 
