@@ -149,7 +149,7 @@ function visualizeMRI
             maskData = h5read(filename, '/mask');
             % Count all the pixels in the mask
             mask = squeeze(maskData(1, :, :));
-            tumorArea = sum(mask);
+            tumorArea = sum(mask(:));
             maxTumorArea = tumorArea;
             maxTumorDiameter = 1;
             outerLayerInvolvement = 1;
