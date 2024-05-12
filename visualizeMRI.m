@@ -64,7 +64,7 @@ function visualizeMRI
         disp('Extracting conventional features...');        
         [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures();
         
-        maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea) ', Slice ID: ' num2str(sliceID)];
+        maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea) ', (ID: ' num2str(sliceID) ')'];
         maxTumorDiameterLabel.Text = ['Max Tumor Diameter: ' num2str(maxTumorDiameter)];
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
     end
