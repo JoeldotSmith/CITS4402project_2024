@@ -140,11 +140,9 @@ function visualizeMRI
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
         try 
-            maxTumorArea = 0;
-            maxTumorDiameter = 0;
-            outerLayerInvolvement = 0;
-            sliceID = 0;
-
+            maxTumorAreaCount = 0;
+            maxTumorDiameterCount = 0;
+            outerLayerInvolvementCount = 0;
 
             % Loop through all slices to find the slice with the largest tumor area
             for i = 1:154
@@ -157,8 +155,8 @@ function visualizeMRI
                     maskData = h5read(filename, '/mask');
                     for j = 1:3
                         mask = squeeze(maskData(j, :, :));
-                        maxTumorArea = max(MaxTumorArea, sum(mask(:)));
-                        if maxTumorArea == sum(mask(:))
+                        maxTumorAreaCount = max(MaxTumorAreaCount, sum(mask(:)));
+                        if maxTumorAreaCount == sum(mask(:))
                             sliceID = i;
                         end
                     end
@@ -174,24 +172,10 @@ function visualizeMRI
 
             end
 
+            maxTumorArea = maxTumorAreaCount;
+            maxTumorDaimeter = maxTumorDiameterCount;
+            outerLayerInvolvement = outerLayerInvolvementCount;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-            maxTumorArea = tumorAreaCount;
-            maxTumorDiameter = 0;
-            outerLayerInvolvement = 0;
-            
 
         catch ME
             disp(['Error reading mask data: ' ME.message]);
