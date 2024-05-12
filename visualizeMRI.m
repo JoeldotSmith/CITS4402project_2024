@@ -104,15 +104,18 @@ function visualizeMRI
             colors = {'r', 'g', 'b'};
     
             % Overlay masks on the image
-            for i = 1:numel(colors)
-                try
-                    mask = squeeze(maskData(i, :, :));
-                    contour(ax, mask, colors{i}, 'LineWidth', 1);
-                catch
-                    disp(['Error reading mask data for mask ' num2str(i)]);
+            if strcmp(annotationDropdown.Value, 'On')
+                for i = 1:numel(colors)
+                    try
+                        mask = squeeze(maskData(i, :, :));
+                        contour(ax, mask, colors{i}, 'LineWidth', 1);
+                    catch
+                        disp(['Error reading mask data for mask ' num2str(i)]);
+                    end
                 end
             end
-    
+
+
             hold(ax, 'off'); % Release the hold on the current axes
             channelIndex = channelIndex - 1;
             if channelIndex == 0
