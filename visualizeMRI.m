@@ -139,65 +139,52 @@ function visualizeMRI
     end
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
-        try 
-            tumorAreaCount = -1;
-            maxTumorDiameterCount = -1;
+        tumorAreaCount = -1;
+        maxTumorDiameterCount = -1;
 
-
-
-            for i = 1:154
-                try
-                    filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
-                    if ~exist(filename, 'file')
-                        disp(['File not found: ' filename]);
-                        throw(MException('MATLAB:FileNotFound', 'File not found'));
-                    end
-
-
-
-
-                    maskData = h5read(filename, '/mask');
-                    for j = 1:3
-
-                        % gets Max area of tumor with slice ID
-                        mask = squeeze(maskData(j, :, :));
-                        tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
-                        if tumorAreaCount == sum(mask(:))
-                            sliceID = i;
-                        end
-
-                        % gets Max diameter of tumor 
-                        [rows, cols] = find(mask);
-                        if ~isempty(rows)
-                            diameter = max(max(pdist2([rows, cols], [rows, cols])));
-                            maxTumorDiameterCount = max(maxTumorDiameterCount, diameter);
-                        end
-
-                    end
-                    
-                catch ME
-                    disp(['Error reading mask data: ' ME.message]);
-                    maxTumorArea = -1;
-                    maxTumorDiameter = -1;
-                    outerLayerInvolvement = -1;
-                    sliceID = -1;
-                    return;
+        for i = 1:154
+            try
+                filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
+                if ~exist(filename, 'file')
+                    disp(['File not found: ' filename]);
+                    throw(MException('MATLAB:FileNotFound', 'File not found'));
                 end
 
+
+
+
+                maskData = h5read(filename, '/mask');
+                for j = 1:3
+
+                    % gets Max area of tumor with slice ID
+                    mask = squeeze(maskData(j, :, :));
+                    tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
+                    if tumorAreaCount == sum(mask(:))
+                        sliceID = i;
+                    end
+
+                    % get max diameter of tumor on each slice and set maxTumorDiameterCount
+                    [B,L] = bwboundaries(mask, 'noholes');
+                    stats = regionprops(L, 'MajorAxisLength');
+                    maxTumorDiameterCount = max(maxTumorDiameterCount, stats.MajorAxisLength);
+
+                end
+                
+            catch ME
+                disp(['Error reading mask data: ' ME.message]);
+                maxTumorArea = -1;
+                maxTumorDiameter = -1;
+                outerLayerInvolvement = -1;
+                sliceID = -1;
+                return;
             end
 
-
-            
-            maxTumorArea = tumorAreaCount;
-            maxTumorDiameter = maxTumorDiameterCount;
-            outerLayerInvolvement = 0;
-            
-
-        catch ME
-            disp(['Error reading mask data: ' ME.message]);
-            maxTumorArea = -1;
-            maxTumorDiameter = -1;
-            outerLayerInvolvement = -1;
         end
+
+
+        
+        maxTumorArea = tumorAreaCount;
+        maxTumorDiameter = maxTumorDiameterCount;
+        outerLayerInvolvement = 0;
     end
 end
