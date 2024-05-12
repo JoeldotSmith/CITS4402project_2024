@@ -65,7 +65,10 @@ function visualizeMRI
         disp('Extracting conventional features...');
         
         % Calculate maximum tumor area, maximum tumor diameter, and outer layer involvement
-        [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures();
+        % [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures();
+        maxTumorArea = 1000;
+        maxTumorDiameter = 50;
+        outerLayerInvolvement = 10; % Dummy values for demonstration 
         
         % Display calculated features
         maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea)];
