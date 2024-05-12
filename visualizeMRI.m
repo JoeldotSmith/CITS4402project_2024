@@ -94,6 +94,10 @@ function visualizeMRI
             imshow(squeeze(imageData(channelIndex, :, :)), 'Parent', ax);
             colormap(ax, gray);
             axis(ax, 'image');
+            channelIndex = channelIndex - 1;
+            if channelIndex == 0
+                channelIndex = 4;
+            end
             title(ax, ['Channel ' num2str(channelIndex)]);
         catch ME
             disp(['Error reading HDF5 file: ' ME.message]);
