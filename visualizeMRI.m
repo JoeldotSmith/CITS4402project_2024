@@ -146,21 +146,23 @@ function visualizeMRI
             tumorArea = sum(mask(:)); % Count tumorous pixels
             maxTumorArea = max(maxTumorArea, tumorArea);
         end
+        maxTumorDiameter = 0;
+        outerLayerInvolvement = 0;
         
         % Calculate Maximum Tumor Diameter
-        maxTumorDiameter = 0;
-        for slice = 1:154 % Assuming 154 slices
-            mask = h5read(filename, '/mask', [1 1 slice], [512 512 1]); % Assuming mask dimensions are 512x512
-            props = regionprops(mask, 'MajorAxisLength'); % Get major axis length of tumor components
-            if ~isempty(props)
-                maxTumorDiameter = max(maxTumorDiameter, max([props.MajorAxisLength]));
-            end
-        end
+        % maxTumorDiameter = 0;
+        % for slice = 1:154 % Assuming 154 slices
+        %     mask = h5read(filename, '/mask', [1 1 slice], [512 512 1]); % Assuming mask dimensions are 512x512
+        %     props = regionprops(mask, 'MajorAxisLength'); % Get major axis length of tumor components
+        %     if ~isempty(props)
+        %         maxTumorDiameter = max(maxTumorDiameter, max([props.MajorAxisLength]));
+        %     end
+        % end
         
-        % Calculate Outer Layer Involvement
-        outerLayerThickness = 5; % Constant thickness of outer layer
-        outerLayerPixels = outerLayerThickness * 512 * 154; % Assuming mask dimensions are 512x512 and 154 slices
-        tumorPixels = sum(h5read(filename, '/mask'), 'all'); % Total tumor pixels
-        outerLayerInvolvement = (tumorPixels / outerLayerPixels) * 100;
+        % % Calculate Outer Layer Involvement
+        % outerLayerThickness = 5; % Constant thickness of outer layer
+        % outerLayerPixels = outerLayerThickness * 512 * 154; % Assuming mask dimensions are 512x512 and 154 slices
+        % tumorPixels = sum(h5read(filename, '/mask'), 'all'); % Total tumor pixels
+        % outerLayerInvolvement = (tumorPixels / outerLayerPixels) * 100;
     end
 end
