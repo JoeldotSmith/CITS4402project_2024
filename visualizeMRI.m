@@ -118,6 +118,3 @@ function visualizeMRI
     end
 
 end
-
-
-
