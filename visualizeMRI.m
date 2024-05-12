@@ -62,9 +62,9 @@ function visualizeMRI
 
     function extractConventionalFeatures(~, ~)
         disp('Extracting conventional features...');        
-        [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures();
+        [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures();
         
-        maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea)];
+        maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea) ', Slice ID: ' num2str(sliceID)];
         maxTumorDiameterLabel.Text = ['Max Tumor Diameter: ' num2str(maxTumorDiameter)];
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
     end
@@ -138,10 +138,10 @@ function visualizeMRI
         updateImages();
     end
 
-    function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement] = calculateConventionalFeatures()
+    function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
         try 
             % Read the mask data from the HDF5 file
-            tumorAreaCount = 0;
+            tumorAreaCount = -1;
             for i = 1:154
                 try
                     filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
@@ -153,6 +153,9 @@ function visualizeMRI
                     for j = 1:3
                         mask = squeeze(maskData(j, :, :));
                         tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
+                        if tumorAreaCount == sum(mask(:))
+                            sliceID = i;
+                        end
                     end
                     
                 catch ME
@@ -160,6 +163,7 @@ function visualizeMRI
                     maxTumorArea = -1;
                     maxTumorDiameter = -1;
                     outerLayerInvolvement = -1;
+                    sliceID = -1;
                     return;
                 end
 
