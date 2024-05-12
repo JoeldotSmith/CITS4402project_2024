@@ -160,7 +160,10 @@ function visualizeMRI
                 % gets Max area of tumor with slice ID
                 for j = 1:3
                     mask = squeeze(maskData(j, :, :));
-                    count = count + sum(mask(:));    
+                    count = count + sum(mask(:));  
+                    
+                    
+
                 end
 
                 if count > tumorAreaCount
@@ -169,7 +172,6 @@ function visualizeMRI
                 end
 
 
-                % gets Max diameter of tumor
                 
 
 
