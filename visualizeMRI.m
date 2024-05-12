@@ -157,17 +157,18 @@ function visualizeMRI
 
 
                 maskData = h5read(filename, '/mask');
+
+
+                count = 0;
+
                 for j = 1:3
 
                     % gets Max area of tumor with slice ID
                     mask = squeeze(maskData(j, :, :));
-                    tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
+                    count = sum(mask(:))
                     if tumorAreaCount == sum(mask(:))
                         sliceID = i;
                     end
-
-                    % get max diameter of tumor on each slice and set maxTumorDiameterCount
-                    
 
                 end
                 
