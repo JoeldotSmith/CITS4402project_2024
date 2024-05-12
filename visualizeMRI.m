@@ -140,8 +140,11 @@ function visualizeMRI
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
         try 
-            % Read the mask data from the HDF5 file
             tumorAreaCount = -1;
+            maxTumorDiameterCount = -1;
+
+
+
             for i = 1:154
                 try
                     filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
@@ -149,13 +152,32 @@ function visualizeMRI
                         disp(['File not found: ' filename]);
                         throw(MException('MATLAB:FileNotFound', 'File not found'));
                     end
+
+
+
+
                     maskData = h5read(filename, '/mask');
                     for j = 1:3
+
+                        % gets Max area of tumor with slice ID
                         mask = squeeze(maskData(j, :, :));
                         tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
                         if tumorAreaCount == sum(mask(:))
                             sliceID = i;
                         end
+
+                        % gets Max diameter of tumor 
+                        % props = regionprops(mask, 'MajorAxisLength');
+                        % if ~isempty(props)
+                        %     diameters = [props.MajorAxisLength];
+                        %     maxTumorDiameterCount = max(maxTumorDiameterCount, max(diameters));
+                        % end
+
+
+
+
+
+
                     end
                     
                 catch ME
@@ -172,7 +194,7 @@ function visualizeMRI
 
             
             maxTumorArea = tumorAreaCount;
-            maxTumorDiameter = 0;
+            maxTumorDiameter = maxTumorDiameterCount;
             outerLayerInvolvement = 0;
             
 
