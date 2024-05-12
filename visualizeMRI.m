@@ -150,8 +150,10 @@ function visualizeMRI
                         throw(MException('MATLAB:FileNotFound', 'File not found'));
                     end
                     maskData = h5read(filename, '/mask');
-                    mask = squeeze(maskData(1, :, :));
-                    tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
+                    for j = 1:3
+                        mask = squeeze(maskData(j, :, :));
+                        tumorAreaCount = max(tumorAreaCount, sum(mask(:)));
+                    end
                     
                 catch ME
                     disp(['Error reading mask data: ' ME.message]);
