@@ -162,14 +162,14 @@ function visualizeMRI
                 count = 0;
 
                 for j = 1:3
-
                     % gets Max area of tumor with slice ID
                     mask = squeeze(maskData(j, :, :));
-                    count = sum(mask(:))
-                    if tumorAreaCount == sum(mask(:))
-                        sliceID = i;
-                    end
+                    count = count + sum(mask(:));    
+                end
 
+                if count > tumorAreaCount
+                    tumorAreaCount = count;
+                    sliceID = i;
                 end
                 
             catch ME
