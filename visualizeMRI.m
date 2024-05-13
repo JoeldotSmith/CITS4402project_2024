@@ -72,7 +72,7 @@ function visualizeMRI
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
 
-
+        data = medicalImage(currentDirectory);
 
 
     end
