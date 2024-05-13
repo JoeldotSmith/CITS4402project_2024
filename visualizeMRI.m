@@ -184,15 +184,8 @@ function visualizeMRI
             % outerLayerInvolvement = (count / outerLayerPixels) * 100;
 
             % Calculate outer layer involvement
-            % the outer layer involvement percentage is the percentage of the tumor area that is within 5 pixels of the edge of the brain
-            outerLayerPixels = 0;
-            for j = 1:3
-                mask = squeeze(maskData(j, :, :));
-                outerLayerMask = imdilate(mask, strel('disk', outerLayerThickness)) & ~mask;
-                outerLayerPixels = outerLayerPixels + sum(outerLayerMask(:));
-            end
-            outerLayerInvolvement = (count / outerLayerPixels) * 100;
-            
+            disp(mask);
+
 
 
             % Store results for this volume
