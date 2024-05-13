@@ -1,4 +1,4 @@
-# groups the volume foles in the folder path by volume number
+# helper function groups the volume foles in the folder path by volume number
 
 
 import os
