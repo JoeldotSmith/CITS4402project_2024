@@ -85,7 +85,8 @@ function visualizeMRI
 
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
-        convertHDF5toNIfTI(currentDirectory);
+        % TODO figure out how to import this data into the radiomics package
+        % convertHDF5toNIfTI(currentDirectory);     
         
 
     end
