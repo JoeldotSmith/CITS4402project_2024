@@ -71,6 +71,23 @@ function visualizeMRI
 
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
+        filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
+        if ~exist(filename, 'file')
+            disp(['File not found: ' filename]);
+            return;
+        end
+        imageData = h5read(filename, '/image');
+        maskData = h5read(filename, '/mask');
+        
+        image = squeeze(imageData(1, :, :));
+        mask = squeeze(maskData(1, :, :));
+
+        % Extract radiomic features
+        features = radiomics_features(image, mask);
+
+        % Save the features to a CSV file
+        output_csv = 'radiomic_features.csv';
+        writetable(features, output_csv);
     end
 
     function updateImages()
