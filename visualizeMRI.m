@@ -142,69 +142,74 @@ function visualizeMRI
     end
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
-        % Initialize variables to store results for all volumes
-        results = [];
-    
-        for i = 1:154
-            try
-                filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
-                if ~exist(filename, 'file')
-                    disp(['File not found: ' filename]);
-                    throw(MException('MATLAB:FileNotFound', 'File not found'));
-                end
-    
-                maskData = h5read(filename, '/mask');
-                count = 0;
-    
-                % Get the size of the mask
-                [rows, cols] = size(maskData);
-    
-                % Iterate over the mask and count the number of pixels that are outside the inner region
-                for j = 1:3
-                    mask = squeeze(maskData(j, :, :));
-    
-                    % Create a mask for the inner region
-                    innerMask = zeros(rows, cols);
-                    innerMask(6:end-5, 6:end-5) = 1;
-    
-                    % Count the number of overlapping pixels between the tumor mask and the inner mask
-                    overlappingPixels = sum(sum(mask & ~innerMask));
-    
-                    % Increment the count by the number of overlapping pixels
-                    count = count + overlappingPixels;
-                end
-    
-                % Calculate the total area of the tumor (excluding the inner region)
-                totalTumorArea = sum(maskData(:)) - sum(innerMask(:));
-    
-                % Calculate the percentage of tumor involvement in the outer layer
-                outerLayerInvolvement = (count / totalTumorArea) * 100;
-    
-                % Store results for this volume
-                results = [results; currentVolume, i, count, outerLayerInvolvement];
-    
-            catch ME
-                disp(['Error reading mask data: ' ME.message]);
-                maxTumorArea = -1;
-                maxTumorDiameter = -1;
-                outerLayerInvolvement = -1;
-                sliceID = -1;
-                return;
+    % Initialize variables to store results for all volumes
+    results = [];
+    outerLayerThickness = 5;
+
+    for i = 1:154
+        try
+            filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
+            if ~exist(filename, 'file')
+                disp(['File not found: ' filename]);
+                throw(MException('MATLAB:FileNotFound', 'File not found'));
             end
+
+            maskData = h5read(filename, '/mask');
+            count = 0;
+            maxDistance = 0;
+
+            % gets Max area of tumor with slice ID
+            for j = 1:3
+                mask = squeeze(maskData(j, :, :));
+                [rows, cols] = find(mask);  % Get x/y coordinates of tumor pixels
+                numPixels = numel(rows);
+
+                % Calculate maximum tumor diameter by finding the furthest apart pixels
+                for k = 1:numPixels
+                    for l = (k + 1):numPixels
+                        distance = sqrt((rows(k) - rows(l))^2 + (cols(k) - cols(l))^2);
+                        if distance > maxDistance
+                            maxDistance = distance;
+                        end
+                    end
+                end
+                
+                count = count + numPixels;  
+            end
+
+            % Calculate outer layer involvement
+            % Assuming outer layer thickness is constant
+            outerLayerThickness = 5;
+            outerLayerPixels = outerLayerThickness * numel(mask);
+            outerLayerInvolvement = (count / outerLayerPixels) * 100;
+
+            % Calculate outer layer involvement
+
+            % Store results for this volume
+            results = [results; currentVolume, i, count, maxDistance, outerLayerInvolvement];
+
+        catch ME
+            disp(['Error reading mask data: ' ME.message]);
+            maxTumorArea = -1;
+            maxTumorDiameter = -1;
+            outerLayerInvolvement = -1;
+            sliceID = -1;
+            return;
         end
-    
-        % Save results to CSV file with column titles
-        csvFilename = 'conventional_features.csv';
-        columnTitles = ["Volume", "Slice", "OuterLayerTumorArea", "OuterLayerInvolvement"];
-        writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
-        dlmwrite(csvFilename, results, '-append', 'Delimiter', ',');  % Append results
-        disp(['Conventional features saved to ' csvFilename]);
-    
-        % Find maximum values
-        [~, maxIndex] = max(results(:, 3));
-        maxTumorArea = results(maxIndex, 3);
-        sliceID = results(maxIndex, 2);
-        outerLayerInvolvement = results(maxIndex, 4);
     end
+
+    % Save results to CSV file with column titles
+    csvFilename = 'conventional_features.csv';
+    columnTitles = ["Volume", "Slice", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
+    writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
+    dlmwrite(csvFilename, results, '-append', 'Delimiter', ',');  % Append results
+    disp(['Conventional features saved to ' csvFilename]);
+
+    % Find maximum values
+    maxTumorArea = max(results(:, 3));
+    maxTumorDiameter = max(results(:, 4));
+    outerLayerInvolvement = max(results(:, 5));
+    sliceID = find(results(:, 3) == maxTumorArea, 1);
+end
 
 end
