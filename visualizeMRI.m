@@ -69,11 +69,29 @@ function visualizeMRI
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
     end
 
+    function convertHDF5toNIfTI(directory)
+        files = dir(fullfile(directory, '*.h5'));
+        
+        for i = 1:numel(files)
+            filename = fullfile(directory, files(i).name);
+            
+            % Read data from HDF5 file
+            imageData = h5read(filename, '/image');
+            % Assuming imageData is in the correct format for NIfTI
+            
+            % Create a NIfTI structure
+            nii = make_nii(imageData);
+            
+            % Save NIfTI file
+            niiFilename = fullfile(directory, [files(i).name, '.nii']);
+            save_nii(nii, niiFilename);
+        end
+    end
+
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
-
-        data = medicalImage(currentDirectory);
-
+        convertHDF5toNIfTI(currentDirectory);
+        
 
     end
 
