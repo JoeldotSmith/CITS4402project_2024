@@ -77,14 +77,9 @@ function visualizeMRI
             
             % Read data from HDF5 file
             imageData = h5read(filename, '/image');
-            % Assuming imageData is in the correct format for NIfTI
             
-            % Create a NIfTI structure
-            nii = make_nii(imageData);
-            
-            % Save NIfTI file
-            niiFilename = fullfile(directory, [files(i).name, '.nii']);
-            save_nii(nii, niiFilename);
+            % Write NIfTI file
+            niftiwrite(imageData, fullfile(directory, [files(i).name, '.nii']));
         end
     end
 
