@@ -71,6 +71,18 @@ function visualizeMRI
 
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
+        data = medicalVolume(currentDirectory);
+        mask = medicalVolume(currentDirectory);
+
+        R = randomics(imageData, maskData);
+        S = shapeFeatures(R);
+        T = textureFeatures(R);
+        I = intensityFeatures(R);
+
+
+
+
+
     end
 
     function updateImages()
