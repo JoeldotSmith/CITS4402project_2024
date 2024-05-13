@@ -142,66 +142,71 @@ function visualizeMRI
     end
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
-        tumorAreaCount = -1;
-        maxTumorDiameterCount = -1;
+    % Initialize variables to store results for all volumes
+    results = [];
 
-        for i = 1:154
-            try
-                filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
-                if ~exist(filename, 'file')
-                    disp(['File not found: ' filename]);
-                    throw(MException('MATLAB:FileNotFound', 'File not found'));
-                end
-
-                maskData = h5read(filename, '/mask');
-                count = 0;
-
-
-                % gets Max area of tumor with slice ID
-                for j = 1:3
-                    mask = squeeze(maskData(j, :, :));
-                    count = count + sum(mask(:));  
-                    
-                    
-
-                end
-
-                if count > tumorAreaCount
-                    tumorAreaCount = count;
-                    sliceID = i;
-                end
-
-
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-                
-            catch ME
-                disp(['Error reading mask data: ' ME.message]);
-                maxTumorArea = -1;
-                maxTumorDiameter = -1;
-                outerLayerInvolvement = -1;
-                sliceID = -1;
-                return;
+    for i = 1:154
+        try
+            filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
+            if ~exist(filename, 'file')
+                disp(['File not found: ' filename]);
+                throw(MException('MATLAB:FileNotFound', 'File not found'));
             end
 
+            maskData = h5read(filename, '/mask');
+            count = 0;
+            maxDistance = 0;
+
+            % gets Max area of tumor with slice ID
+            for j = 1:3
+                mask = squeeze(maskData(j, :, :));
+                [rows, cols] = find(mask);  % Get x/y coordinates of tumor pixels
+                numPixels = numel(rows);
+
+                % Calculate maximum tumor diameter by finding the furthest apart pixels
+                for k = 1:numPixels
+                    for l = (k + 1):numPixels
+                        distance = sqrt((rows(k) - rows(l))^2 + (cols(k) - cols(l))^2);
+                        if distance > maxDistance
+                            maxDistance = distance;
+                        end
+                    end
+                end
+                
+                count = count + numPixels;  
+            end
+
+            % Calculate outer layer involvement
+            % Assuming outer layer thickness is constant
+            outerLayerThickness = 5;
+            outerLayerPixels = outerLayerThickness * numel(mask);
+            outerLayerInvolvement = (count / outerLayerPixels) * 100;
+
+            % Store results for this volume
+            results = [results; currentVolume, i, count, maxDistance, outerLayerInvolvement];
+
+        catch ME
+            disp(['Error reading mask data: ' ME.message]);
+            maxTumorArea = -1;
+            maxTumorDiameter = -1;
+            outerLayerInvolvement = -1;
+            sliceID = -1;
+            return;
         end
-
-
-        
-        maxTumorArea = tumorAreaCount;
-        maxTumorDiameter = maxTumorDiameterCount;
-        outerLayerInvolvement = 0;
     end
+
+    % Save results to CSV file with column titles
+    csvFilename = 'conventional_features.csv';
+    columnTitles = ["Volume", "Slice", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
+    writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
+    dlmwrite(csvFilename, results, '-append', 'Delimiter', ',');  % Append results
+    disp(['Conventional features saved to ' csvFilename]);
+
+    % Find maximum values
+    maxTumorArea = max(results(:, 3));
+    maxTumorDiameter = max(results(:, 4));
+    outerLayerInvolvement = max(results(:, 5));
+    sliceID = find(results(:, 3) == maxTumorArea, 1);
+end
+
 end
