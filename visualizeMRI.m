@@ -144,6 +144,7 @@ function visualizeMRI
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
     % Initialize variables to store results for all volumes
     results = [];
+    outerLayerThickness = 5;
 
     for i = 1:154
         try
@@ -178,9 +179,21 @@ function visualizeMRI
 
             % Calculate outer layer involvement
             % Assuming outer layer thickness is constant
-            outerLayerThickness = 5;
-            outerLayerPixels = outerLayerThickness * numel(mask);
+            % outerLayerThickness = 5;
+            % outerLayerPixels = outerLayerThickness * numel(mask);
+            % outerLayerInvolvement = (count / outerLayerPixels) * 100;
+
+            % Calculate outer layer involvement
+            % the outer layer involvement percentage is the percentage of the tumor area that is within 5 pixels of the edge of the brain
+            outerLayerPixels = 0;
+            for j = 1:3
+                mask = squeeze(maskData(j, :, :));
+                outerLayerMask = imdilate(mask, strel('disk', outerLayerThickness)) & ~mask;
+                outerLayerPixels = outerLayerPixels + sum(outerLayerMask(:));
+            end
             outerLayerInvolvement = (count / outerLayerPixels) * 100;
+            
+
 
             % Store results for this volume
             results = [results; currentVolume, i, count, maxDistance, outerLayerInvolvement];
