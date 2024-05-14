@@ -69,25 +69,25 @@ function visualizeMRI
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
     end
 
-    function convertHDF5toNIfTI(directory)
-        files = dir(fullfile(directory, '*.h5'));
-        
-        for i = 1:numel(files)
-            filename = fullfile(directory, files(i).name);
-            
-            % Read data from HDF5 file
-            imageData = h5read(filename, '/image');
-            
-            % Write NIfTI file
-            niftiwrite(imageData, fullfile(directory, [files(i).name, '.nii']));
-        end
-    end
 
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
         % TODO figure out how to import this data into the radiomics package
-        % convertHDF5toNIfTI(currentDirectory);     
+       sliceFile = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
+         if ~exist(sliceFile, 'file')
+              disp(['File not found: ' sliceFile]);
+              return;
+         end
+        imageData = h5read(sliceFile, '/image');
+        maskData = h5read(sliceFile, '/mask');
         
+        data = radiomic(imageData, maskData);
+        % export data to csv
+        csvFilename = 'radiomic_features.csv';
+        columnTitles = ["Volume", "Slice", "Feature1", "Feature2", "Feature3"];
+        writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
+        dlmwrite(csvFilename, data, '-append', 'Delimiter', ',');  % Append results
+        disp(['Radiomic features saved to ' csvFilename]);
 
     end
 
