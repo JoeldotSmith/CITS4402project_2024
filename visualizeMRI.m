@@ -73,21 +73,11 @@ function visualizeMRI
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
         % TODO figure out how to import this data into the radiomics package
-       sliceFile = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
-         if ~exist(sliceFile, 'file')
-              disp(['File not found: ' sliceFile]);
-              return;
-         end
-        imageData = h5read(sliceFile, '/image');
-        maskData = h5read(sliceFile, '/mask');
-        
-        data = radiomic(imageData, maskData);
-        % export data to csv
-        csvFilename = 'radiomic_features.csv';
-        columnTitles = ["Volume", "Slice", "Feature1", "Feature2", "Feature3"];
-        writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
-        dlmwrite(csvFilename, data, '-append', 'Delimiter', ',');  % Append results
-        disp(['Radiomic features saved to ' csvFilename]);
+        filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
+        h5disp(filename);
+        imageData = h5read
+        disp("IMAGEDATA");
+
 
     end
 
