@@ -75,13 +75,6 @@ function visualizeMRI
         % TODO figure out how to import this data into the radiomics package
         filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
         h5disp(filename);
-        imageData = h5read(filename, '/image');
-        maskData = h5read(filename, '/mask');
-        disp("IMAGEDATA");
-        disp(imageData);
-        disp("MASKDATA");
-        disp(maskData);
-
     end
 
     function updateImages()
