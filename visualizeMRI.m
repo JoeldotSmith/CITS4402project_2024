@@ -69,12 +69,25 @@ function visualizeMRI
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
     end
 
+    function convertH5toNii(directory)
+        files = dir(fullfile(directory, '*.h5'));
+        imageDataAll = zeros(240, 240, numel(files), 4);
+        for i = 1:numel(files)
+            filename = fullfile(directory, files(i).name);
+            imageData = h5read(filename, '/image');
+            imageDataAll(:, :, i, :) = permute(imageData, [2, 3, 1]);
+        end
+        nii = make_nii(imageDataAll);
+        save_nii(nii, 'output.nii');
+    end
+
 
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
         % TODO figure out how to import this data into the radiomics package
         filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
         h5disp(filename);
+        convertH5toNii(currentDirectory);
     end
 
     function updateImages()
