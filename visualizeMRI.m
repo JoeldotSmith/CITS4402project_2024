@@ -120,14 +120,14 @@ function visualizeMRI
     
             colors = {'r', 'g', 'b'};
             image = squeeze(imageData(2, :, :));
-            % contour(ax, image, colors{2}, "FaceColor", "auto", "FaceAlpha", 0.5);
+            contour(ax, iage, colors{1}, "FaceColor", "auto");
     
             % Overlay masks on the image
             if strcmp(annotationDropdown.Value, 'On')
                 for i = 1:numel(colors)
                     try
                         mask = squeeze(maskData(i, :, :));
-                        contour(ax, mask, colors{i}, "FaceColor", "auto", "FaceAlpha", 0.5);
+                        contour(ax, mask, colors{i}, "FaceColor", "auto");
                     catch
                         disp(['Error reading mask data for mask ' num2str(i)]);
                     end
