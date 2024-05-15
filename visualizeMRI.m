@@ -125,7 +125,7 @@ function visualizeMRI
                 for i = 1:numel(colors)
                     try
                         mask = squeeze(maskData(i, :, :));
-                        image = squeeze(imageData(i, :, :))
+                        image = squeeze(imageData(i, :, :));
                         contour(ax, mask, colors{i});
                         contour(ax, image, colors{i});
                     catch
