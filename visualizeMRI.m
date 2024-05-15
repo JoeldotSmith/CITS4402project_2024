@@ -120,7 +120,7 @@ function visualizeMRI
     
             colors = {'r', 'g', 'b'};
             image = squeeze(imageData(2, :, :));
-            contour(ax, image, colors{2}, "LineWidth", 5);
+            % contour(ax, image, colors{2}, "LineWidth", 5);
     
             % Overlay masks on the image
             if strcmp(annotationDropdown.Value, 'On')
