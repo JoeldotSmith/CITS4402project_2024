@@ -125,7 +125,7 @@ function visualizeMRI
                 for i = 1:numel(colors)
                     try
                         mask = squeeze(maskData(i, :, :));
-                        contourf(ax, mask, colors{i});
+                        contour(ax, mask, colors{i});
                     catch
                         disp(['Error reading mask data for mask ' num2str(i)]);
                     end
