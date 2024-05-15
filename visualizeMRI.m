@@ -87,6 +87,8 @@ function visualizeMRI
         filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
         h5disp(filename);
         convertH5toNii(currentDirectory);
+        data = medicalImage(currentDirectory);
+        
     end
 
     function updateImages()
