@@ -77,8 +77,7 @@ function visualizeMRI
             imageData = h5read(filename, '/image');
             imageDataAll(:, :, i, :) = permute(imageData, [2, 3, 1]);
         end
-        nii = make_nii(imageDataAll);
-        save_nii(nii, 'output.nii');
+        niftiwrite(imageDataAll, fullfile(directory, 'output.nii'));
     end
 
 
