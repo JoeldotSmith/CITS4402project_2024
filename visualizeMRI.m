@@ -94,9 +94,10 @@ function visualizeMRI
         I = intensityFeatures(R);
         T = textureFeatures(R);
 
-        writetable(S, 'shape_features.csv');
-        writetable(I, 'intensity_features.csv');
-        writetable(T, 'texture_features.csv');
+        writetable(S, fullfile(currentDirectory, 'shape_features.csv'));
+        writetable(I, fullfile(currentDirectory, 'intensity_features.csv'));
+        writetable(T, fullfile(currentDirectory, 'texture_features.csv'));
+        disp(['Radiomic features saved to ' currentDirectory]);
    
     end
 
@@ -229,7 +230,7 @@ function visualizeMRI
         end
 
         % Save results to CSV file with column titles
-        csvFilename = 'conventional_features.csv';
+        csvFilename = fullfile(currentDirectory, 'conventional_features.csv');
         columnTitles = ["Volume", "Slice", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
         writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
         dlmwrite(csvFilename, results, '-append', 'Delimiter', ',');  % Append results
