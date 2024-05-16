@@ -69,15 +69,16 @@ function visualizeMRI
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
     end
 
-    function convertH5toNii(directory)
+    function convertH5toNii(directory, type, name)
         files = dir(fullfile(directory, '*.h5'));
-        imageDataAll = zeros(240, 240, numel(files), 4);
+        imageDataAll = zeros(240, 240, numel(files));
         for i = 1:numel(files)
             filename = fullfile(directory, files(i).name);
-            imageData = h5read(filename, '/image');
-            imageDataAll(:, :, i, :) = permute(imageData, [2, 3, 1]);
+            imageData = h5read(filename, type);
+            imageDataFirstSet = imageData(1, :, :);
+            imageDataAll(:, :, i) = imageDataFirstSet;
         end
-        niftiwrite(imageDataAll, fullfile(directory, 'output.nii'));
+        niftiwrite(imageDataAll, fullfile(directory, name));
     end
 
 
@@ -86,10 +87,34 @@ function visualizeMRI
         % TODO figure out how to import this data into the radiomics package
         filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
         h5disp(filename);
-        convertH5toNii(currentDirectory);
-        data = medicalImage(currentDirectory);
+        convertH5toNii(currentDirectory, '/image', 'output.nii');
+        convertH5toNii(currentDirectory, '/mask', 'mask.nii')
+        data = medicalVolume(fullfile(currentDirectory, 'output.nii'));
+        mask = medicalVolume(fullfile(currentDirectory, 'mask.nii'));
+        disp(data);
+        disp(mask);
+        R = radiomics(data, mask);
+        S = shapeFeatures(R);
+        I = intensityFeatures(R);
+        T = textureFeatures(R);
+
+        disp(S);
+
+        sTable1 = struct2table(S(1, :));
+        sTable2 = struct2table(S(2, :));
+        iTable1 = struct2table(I(1, :));
+        iTable2 = struct2table(I(2, :));
+        tTable1 = struct2table(T(1, :));
+        tTable2 = struct2table(T(2, :));
+        
+        % combine tables
+        combinedTable = [sTable1, sTable2, iTable1, iTable2, tTable1, tTable2];
+
+        writetable(combinedTable, fullfile(currentDirectory, 'radiomicFeatures.csv'));
+
         
     end
+
 
     function updateImages()
         if isempty(currentDirectory)
