@@ -62,11 +62,39 @@ function visualizeMRI
 
     function extractConventionalFeatures(~, ~)
         disp('Extracting conventional features...');        
-        [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures();
-        
+        [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(currentDirectory, currentVolume);
         maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea) ', (ID: ' num2str(sliceID) ')'];
         maxTumorDiameterLabel.Text = ['Max Tumor Diameter: ' num2str(maxTumorDiameter)];
         outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
+        
+        mainDir = uigetdir();
+        if mainDir == 0
+            % User cancelled
+            return;
+        end
+
+        subfolders = dir(fullfile(mainDir));
+        allResults = [];
+        
+        for i = 1:numel(subfolders)
+            directory = fullfile(mainDir, subfolders(i).name);
+        
+            % Extract volume number from the directory name
+            [~, currentVolumeStr, ~] = fileparts(directory);
+            volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
+            [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(directory, volume);
+            volumeResults = [maxTumorArea, maxTumorDiameter, outerLayerInvolvement];
+            allResults = [allResults; volumeResults];
+        end
+
+        csvFilename = fullfile(currentDirectory, 'conventional_features.csv');
+        columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
+        writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
+        dlmwrite(csvFilename, allResults, '-append', 'Delimiter', ',');  % Append results
+        disp(['Conventional features saved to ' csvFilename]);
+
+
+
     end
 
     function convertH5toNii(directory, type, name)
@@ -172,14 +200,14 @@ function visualizeMRI
         updateImages();
     end
 
-    function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures()
+    function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(dir, vol)
         % Initialize variables to store results for all volumes
         results = [];
         outerLayerThickness = 5;
 
         for i = 1:154
             try
-                filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, i));
+                filename = fullfile(dir, sprintf('volume_%d_slice_%d.h5', vol, i));
                 if ~exist(filename, 'file')
                     disp(['File not found: ' filename]);
                     throw(MException('MATLAB:FileNotFound', 'File not found'));
@@ -228,13 +256,7 @@ function visualizeMRI
                 return;
             end
         end
-
-        % Save results to CSV file with column titles
-        csvFilename = fullfile(currentDirectory, 'conventional_features.csv');
-        columnTitles = ["Volume", "Slice", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
-        writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
-        dlmwrite(csvFilename, results, '-append', 'Delimiter', ',');  % Append results
-        disp(['Conventional features saved to ' csvFilename]);
+        
 
         % Find maximum values
         maxTumorArea = max(results(:, 3));
