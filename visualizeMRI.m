@@ -119,16 +119,23 @@ function visualizeMRI
             return;
         end
 
-        subfolders = dir(fullfile(mainDir));
+        subfolders = dir(fullfile(mainDir, 'volume_*'));
+        subfolders = subfolders([subfolders.isdir]); 
+        subfolders = subfolders(~ismember({subfolders.name}, {'.', '..'}));
         allResults = [];
 
+        for j = 1:numel(subfolders)
+            disp(subfolders(j).name);
+        end
+        
         for i = 1:numel(subfolders)
+
+
             directory = fullfile(mainDir, subfolders(i).name);
             disp(['Radiomic features extracting from ' subfolders(i).name]);
             [~, currentVolumeStr, ~] = fileparts(directory);
             volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
             
-            filename = fullfile(directory, sprintf('volume_%d_slice_%d.h5', volume, 77));
             convertH5toNii(directory, '/image', 'output.nii');
             convertH5toNii(directory, '/mask', 'mask.nii')
             data = medicalVolume(fullfile(directory, 'output.nii'));
@@ -153,19 +160,21 @@ function visualizeMRI
             selectedFeaturesT = T(:, {'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'ContrastAveraged3D', 'DissimilarityAveraged3D', ...
                                      'ClusterTendencyAveraged3D', 'ClusterShadeAveraged3D', 'ClusterProminenceAveraged3D', ...
                                      'InverseDifferenceAveraged3D', 'CorrelationAveraged3D', 'AutoCorrelationAveraged3D'});
-
+            % Add 'Volume' column to each table
+            selectedFeaturesS.LabelID = volume;
+            selectedFeaturesT.maxTumorArea = maxTumorArea;
+            selectedFeaturesT.maxTumorDiameter = maxTumorDiameter;
+            selectedFeaturesT.outerLayerInvolvement = outerLayerInvolvement;
+            allData = [selectedFeaturesS, selectedFeaturesI, selectedFeaturesT];
+            allResults = [allResults; allData];
         end
         
         
-        % Add 'Volume' column to each table
-        selectedFeaturesS.LabelID = currentVolume;
-        selectedFeaturesT.maxTumorArea = maxTumorArea;
-        selectedFeaturesT.maxTumorDiameter = maxTumorDiameter;
-        selectedFeaturesT.outerLayerInvolvement = outerLayerInvolvement;
+        
     
         % Write selected features to CSV
-        allData = [selectedFeaturesS, selectedFeaturesI, selectedFeaturesT];
-        writetable(allData, 'radiomic_table.csv');
+        
+        writetable(allResults, 'radiomic_table.csv');
         disp(['Radiomic features saved as radiomic_features.csv']);
     end
 
