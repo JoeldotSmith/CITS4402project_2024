@@ -98,19 +98,24 @@ function visualizeMRI
         I = intensityFeatures(R);
         T = textureFeatures(R);
 
-        disp(S);
-
-        sTable1 = struct2table(S(1, :));
-        sTable2 = struct2table(S(2, :));
-        iTable1 = struct2table(I(1, :));
-        iTable2 = struct2table(I(2, :));
-        tTable1 = struct2table(T(1, :));
-        tTable2 = struct2table(T(2, :));
+        shape_feature_names = fieldnames(S);
+        shape_feature_values_1 = struct2cell(S(1,:));
+        shape_feature_values_2 = struct2cell(S(2,:));
+        S_table_1 = table(shape_feature_values_1{:}, 'VariableNames', shape_feature_names);
+        S_table_2 = table(shape_feature_values_2{:}, 'VariableNames', shape_feature_names);
         
-        % combine tables
-        combinedTable = [sTable1, sTable2, iTable1, iTable2, tTable1, tTable2];
-
-        writetable(combinedTable, fullfile(currentDirectory, 'radiomicFeatures.csv'));
+        intensity_feature_names = fieldnames(I);
+        intensity_feature_values_1 = struct2cell(I(1, :));
+        intensity_feature_values_2 = struct2cell(I(2, :));
+        I_table = table(intensity_feature_values_1{:}, 'VariableNames', intensity_feature_names);
+        I_table = table(intensity_feature_values_2{:}, 'VariableNames', intensity_feature_names);
+          
+        texture_feature_names = fieldnames(T);
+        texture_feature_values = struct2cell(T);
+        T_table = table(texture_feature_values{:}, 'VariableNames', texture_feature_names);       
+        combined_table = [S_table_1, S_table_2, I_table, T_table];
+        
+        writetable(combined_table, 'radiomics_features.csv');
 
         
     end
