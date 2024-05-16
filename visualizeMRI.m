@@ -78,16 +78,19 @@ function visualizeMRI
         
         for i = 1:numel(subfolders)
             directory = fullfile(mainDir, subfolders(i).name);
-        
-            % Extract volume number from the directory name
+            
             [~, currentVolumeStr, ~] = fileparts(directory);
             volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
+
             [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(directory, volume);
-            volumeResults = [maxTumorArea, maxTumorDiameter, outerLayerInvolvement];
-            allResults = [allResults; volumeResults];
+            volumeResults = [volume, maxTumorArea, maxTumorDiameter, outerLayerInvolvement];
+            disp(volumeResults);
+            if maxTumorArea ~= -1
+                allResults = [allResults; volumeResults];
+            end
         end
 
-        csvFilename = fullfile(currentDirectory, 'conventional_features.csv');
+        csvFilename = 'conventional_features.csv';
         columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
         writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
         dlmwrite(csvFilename, allResults, '-append', 'Delimiter', ',');  % Append results
