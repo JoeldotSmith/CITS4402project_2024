@@ -113,33 +113,60 @@ function visualizeMRI
 
 
     function extractRadiomicFeatures(~, ~)
-        disp('Radiomic features extracted');
-        filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
-        convertH5toNii(currentDirectory, '/image', 'output.nii');
-        convertH5toNii(currentDirectory, '/mask', 'mask.nii')
-        data = medicalVolume(fullfile(currentDirectory, 'output.nii'));
-        mask = medicalVolume(fullfile(currentDirectory, 'mask.nii'));
-        R = radiomics(data, mask);
-        S = shapeFeatures(R);
-        I = intensityFeatures(R);
-        T = textureFeatures(R);
+        mainDir = uigetdir();
+        if mainDir == 0
+            % User cancelled
+            return;
+        end
+
+        subfolders = dir(fullfile(mainDir));
+        allResults = [];
+
+        for i = 1:numel(subfolders)
+            directory = fullfile(mainDir, subfolders(i).name);
+            disp(['Radiomic features extracting from ' subfolders(i).name]);
+            [~, currentVolumeStr, ~] = fileparts(directory);
+            volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
+            
+            filename = fullfile(directory, sprintf('volume_%d_slice_%d.h5', volume, 77));
+            convertH5toNii(directory, '/image', 'output.nii');
+            convertH5toNii(directory, '/mask', 'mask.nii')
+            data = medicalVolume(fullfile(directory, 'output.nii'));
+            mask = medicalVolume(fullfile(directory, 'mask.nii'));
+            R = radiomics(data, mask);
+            S = shapeFeatures(R);
+            I = intensityFeatures(R);
+            T = textureFeatures(R);
+            maxTumorArea = -1;
+            maxTumorDiameter = -1;
+            outerLayerInvolvement = -1;
+            sliceID = -1;
+            [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, ~] = calculateConventionalFeatures(dir, volume);
+    
+    
+            selectedFeaturesS = S(:, {'LabelID', 'VolumeMesh3D', 'SurfaceAreaMesh3D', 'Sphericity3D', ...
+                                     'VolumeDensityAABB_3D', 'MajorAxisLength3D', 'MinorAxisLength3D', ...
+                                     'Elongation3D', 'Flatness3D', 'IntegratedIntensity3D'});
+            selectedFeaturesI = I(:, {'MeanIntensity3D', 'MedianIntensity3D', 'MinimumIntensity3D', 'MaximumIntensity3D', ...
+                                     'IntensityVariance3D', 'IntensitySkewness3D', 'IntensityKurtosis3D', ...
+                                     'IntensityRange3D', 'IntensityInterquartileRange3D', 'RootMeanSquare3D'});
+            selectedFeaturesT = T(:, {'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'ContrastAveraged3D', 'DissimilarityAveraged3D', ...
+                                     'ClusterTendencyAveraged3D', 'ClusterShadeAveraged3D', 'ClusterProminenceAveraged3D', ...
+                                     'InverseDifferenceAveraged3D', 'CorrelationAveraged3D', 'AutoCorrelationAveraged3D'});
+
+        end
         
-
-
-        selectedFeaturesS = S(:, {'VolumeDensityConvexHull3D', 'VolumeMesh3D', 'SurfaceAreaMesh3D', 'Sphericity3D', ...
-                             'VolumeDensityAABB_3D', 'MajorAxisLength3D', 'MinorAxisLength3D', ...
-                             'Elongation3D', 'Flatness3D', 'IntegratedIntensity3D'});
-        selectedFeaturesI = I(:, {'MeanIntensity3D', 'MedianIntensity3D', 'MinimumIntensity3D', 'MaximumIntensity3D', ...
-                             'IntensityVariance3D', 'IntensitySkewness3D', 'IntensityKurtosis3D', ...
-                             'IntensityRange3D', 'IntensityInterquartileRange3D', 'RootMeanSquare3D'});
-        selectedFeaturesT = T(:, {'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'ContrastAveraged3D', 'DissimilarityAveraged3D', ...
-                             'ClusterTendencyAveraged3D', 'ClusterShadeAveraged3D', 'ClusterProminenceAveraged3D', ...
-                             'InverseDifferenceAveraged3D', 'CorrelationAveraged3D', 'AutoCorrelationAveraged3D'});
-
+        
+        % Add 'Volume' column to each table
+        selectedFeaturesS.LabelID = currentVolume;
+        selectedFeaturesT.maxTumorArea = maxTumorArea;
+        selectedFeaturesT.maxTumorDiameter = maxTumorDiameter;
+        selectedFeaturesT.outerLayerInvolvement = outerLayerInvolvement;
+    
+        % Write selected features to CSV
         allData = [selectedFeaturesS, selectedFeaturesI, selectedFeaturesT];
         writetable(allData, 'radiomic_table.csv');
-        disp(['Radiomic features saved to ' currentDirectory]);
-   
+        disp(['Radiomic features saved as radiomic_features.csv']);
     end
 
 
