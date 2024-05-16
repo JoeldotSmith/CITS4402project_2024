@@ -118,16 +118,12 @@ function visualizeMRI
             % User cancelled
             return;
         end
-
+        disp('EXTRACTING RADIOMIC FEATURES');
         subfolders = dir(fullfile(mainDir, 'volume_*'));
         subfolders = subfolders([subfolders.isdir]); 
         subfolders = subfolders(~ismember({subfolders.name}, {'.', '..'}));
         allResults = [];
 
-        for j = 1:numel(subfolders)
-            disp(subfolders(j).name);
-        end
-        
         for i = 1:numel(subfolders)
 
 
@@ -148,7 +144,7 @@ function visualizeMRI
             maxTumorDiameter = -1;
             outerLayerInvolvement = -1;
             sliceID = -1;
-            [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, ~] = calculateConventionalFeatures(dir, volume);
+            [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, ~] = calculateConventionalFeatures(directory, volume);
     
     
             selectedFeaturesS = S(:, {'LabelID', 'VolumeMesh3D', 'SurfaceAreaMesh3D', 'Sphericity3D', ...
