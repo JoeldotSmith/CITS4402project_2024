@@ -82,9 +82,8 @@ function visualizeMRI
             [~, currentVolumeStr, ~] = fileparts(directory);
             volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
 
-            [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(directory, volume);
+            [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, ~] = calculateConventionalFeatures(directory, volume);
             volumeResults = [volume, maxTumorArea, maxTumorDiameter, outerLayerInvolvement];
-            disp(volumeResults);
             if maxTumorArea ~= -1
                 allResults = [allResults; volumeResults];
             end
