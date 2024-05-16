@@ -84,40 +84,20 @@ function visualizeMRI
 
     function extractRadiomicFeatures(~, ~)
         disp('Radiomic features extracted');
-        % TODO figure out how to import this data into the radiomics package
         filename = fullfile(currentDirectory, sprintf('volume_%d_slice_%d.h5', currentVolume, currentSlice));
-        h5disp(filename);
         convertH5toNii(currentDirectory, '/image', 'output.nii');
         convertH5toNii(currentDirectory, '/mask', 'mask.nii')
         data = medicalVolume(fullfile(currentDirectory, 'output.nii'));
         mask = medicalVolume(fullfile(currentDirectory, 'mask.nii'));
-        disp(data);
-        disp(mask);
         R = radiomics(data, mask);
         S = shapeFeatures(R);
         I = intensityFeatures(R);
         T = textureFeatures(R);
 
-        shape_feature_names = fieldnames(S);
-        shape_feature_values_1 = struct2cell(S(1,:));
-        shape_feature_values_2 = struct2cell(S(2,:));
-        S_table_1 = table(shape_feature_values_1{:}, 'VariableNames', shape_feature_names);
-        S_table_2 = table(shape_feature_values_2{:}, 'VariableNames', shape_feature_names);
-        
-        intensity_feature_names = fieldnames(I);
-        intensity_feature_values_1 = struct2cell(I(1, :));
-        intensity_feature_values_2 = struct2cell(I(2, :));
-        I_table = table(intensity_feature_values_1{:}, 'VariableNames', intensity_feature_names);
-        I_table = table(intensity_feature_values_2{:}, 'VariableNames', intensity_feature_names);
-          
-        texture_feature_names = fieldnames(T);
-        texture_feature_values = struct2cell(T);
-        T_table = table(texture_feature_values{:}, 'VariableNames', texture_feature_names);       
-        combined_table = [S_table_1, S_table_2, I_table, T_table];
-        
-        writetable(combined_table, 'radiomics_features.csv');
-
-        
+        writetable(S, 'shape_features.csv');
+        writetable(I, 'intensity_features.csv');
+        writetable(T, 'texture_features.csv');
+   
     end
 
 

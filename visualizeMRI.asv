@@ -111,8 +111,10 @@ function visualizeMRI
         I_table = table(intensity_feature_values_2{:}, 'VariableNames', intensity_feature_names);
           
         texture_feature_names = fieldnames(T);
-        texture_feature_values = struct2cell(T);
-        T_table = table(texture_feature_values{:}, 'VariableNames', texture_feature_names);       
+        texture_feature_values_1 = struct2cell(T(1, :));
+        texture_feature_values_2 = struct2cell(T(2, :));
+        T_table = table(texture_feature_values_1{:}, 'VariableNames', texture_feature_names);       
+        T_table = table(texture_feature_values_2{:}, 'VariableNames', texture_feature_names);       
         combined_table = [S_table_1, S_table_2, I_table, T_table];
         
         writetable(combined_table, 'radiomics_features.csv');
