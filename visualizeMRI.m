@@ -123,10 +123,21 @@ function visualizeMRI
         S = shapeFeatures(R);
         I = intensityFeatures(R);
         T = textureFeatures(R);
+        
 
-        writetable(S, fullfile(currentDirectory, 'shape_features.csv'));
-        writetable(I, fullfile(currentDirectory, 'intensity_features.csv'));
-        writetable(T, fullfile(currentDirectory, 'texture_features.csv'));
+
+        selectedFeaturesS = S(:, {'VolumeDensityConvexHull3D', 'VolumeMesh3D', 'SurfaceAreaMesh3D', 'Sphericity3D', ...
+                             'VolumeDensityAABB_3D', 'MajorAxisLength3D', 'MinorAxisLength3D', ...
+                             'Elongation3D', 'Flatness3D', 'IntegratedIntensity3D'});
+        selectedFeaturesI = I(:, {'MeanIntensity3D', 'MedianIntensity3D', 'MinimumIntensity3D', 'MaximumIntensity3D', ...
+                             'IntensityVariance3D', 'IntensitySkewness3D', 'IntensityKurtosis3D', ...
+                             'IntensityRange3D', 'IntensityInterquartileRange3D', 'RootMeanSquare3D'});
+        selectedFeaturesT = T(:, {'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'ContrastAveraged3D', 'DissimilarityAveraged3D', ...
+                             'ClusterTendencyAveraged3D', 'ClusterShadeAveraged3D', 'ClusterProminenceAveraged3D', ...
+                             'InverseDifferenceAveraged3D', 'CorrelationAveraged3D', 'AutoCorrelationAveraged3D'});
+
+        allData = [selectedFeaturesS, selectedFeaturesI, selectedFeaturesT];
+        writetable(allData, 'radiomic_table.csv');
         disp(['Radiomic features saved to ' currentDirectory]);
    
     end
