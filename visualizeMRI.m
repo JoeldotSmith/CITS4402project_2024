@@ -287,9 +287,8 @@ function visualizeMRI
                 
                 
                 [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvement(dir, vol, i);
-                outerLayerInvolvement = (numberOfOverLappingTumorPixels/numberOfOuterLayerPixels) * 100;
 
-                results = [results; vol, i, count, maxDistance, outerLayerInvolvement];
+                results = [results; vol, i, count, maxDistance, numberOfOuterLayerPixels, numberOfOverLappingTumorPixels];
 
             catch ME
                 disp(['Error reading mask data: ' ME.message ME.stack]);
@@ -305,7 +304,9 @@ function visualizeMRI
         % Find maximum values
         maxTumorArea = max(results(:, 3));
         maxTumorDiameter = max(results(:, 4));
-        outerLayerInvolvement = sum(results(:, 5));
+        totalOuterLayerPixels = sum(results(:, 5));
+        totalTumorLayerPixels = sum(results(:, 6));
+        outerLayerInvolvement = (totalTumorLayerPixels/totalOuterLayerPixels) * 100;
         sliceID = find(results(:, 3) == maxTumorArea, 1);
     end
 
@@ -324,46 +325,49 @@ function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvemen
     end
 
     try
+        calcOuterLayer = 0;
+        calcTumorLayer = 0;
         imageData = h5read(filename, '/image');
         maskData = h5read(filename, '/mask');
         se = strel('square', 3);
-        numberOfOverLappingTumorPixels = 0;
+
         count = 0;
-
-
-
 
         % Pre Processing
         image = squeeze(imageData(1, :, :));
         image = imbinarize(image);
-        image = bwconvhull(image, "objects");
+        imageS = bwconvhull(image, "objects");
         
         % Erosion
-        erImage = imerode(image, se);
-        for i = 1:4
+        erImage = imerode(imageS, se);
+        for i = 1:5
             erImage = imerode(erImage, se);
         end 
 
         % Post Processing
         finalImage = image - erImage;
         finalImage = imbinarize(finalImage);
+        
 
-        numberOfOuterLayerPixels = sum(finalImage);
+        calcOuterLayer = sum(finalImage(:));
         
         
          for i= 1:3
-             mask = squeeze(maskData(2, :, :));
+             mask = squeeze(maskData(i, :, :));
              mask = imbinarize(mask);
              bitImage = bitand(finalImage, mask);
-             count = sum(bitImage);
-             numberOfOverLappingTumorPixels = numberOfOverLappingTumorPixels + count;            
+             count = sum(bitImage(:));
+             calcTumorLayer = calcTumorLayer + count;
          end
-        % imshow(finalImage);
+         % imshow(finalImage);
+        
     catch ME
         disp(['Something wrong ' ME.message]);
-        numberOfOuterLayerPixels = 1;
-        numberOfOverLappingTumorPixels = 0;
+        calcOuterLayer = 1;
+        calcTumorLayer = 1;
     end
+    numberOfOuterLayerPixels = calcOuterLayer;
+    numberOfOverLappingTumorPixels = calcTumorLayer;
     
     
 end
