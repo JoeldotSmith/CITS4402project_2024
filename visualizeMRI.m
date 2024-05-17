@@ -25,7 +25,7 @@ function visualizeMRI
     currentDirectory = '';
     currentChannel = 'T1';
     currentSlice = 1;
-    currentVolume = 1;  % Initialize currentVolume
+    currentVolume = -1;  % Initialize currentVolume
 
     % Callback functions
     function loadSliceDirectory(~, ~)
@@ -61,24 +61,27 @@ function visualizeMRI
     end
 
     function extractConventionalFeatures(~, ~)
-        disp('Extracting conventional features...');        
-        [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(currentDirectory, currentVolume);
-        maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea) ', (ID: ' num2str(sliceID) ')'];
-        maxTumorDiameterLabel.Text = ['Max Tumor Diameter: ' num2str(maxTumorDiameter)];
-        outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
-        
+        if currentVolume ~= -1
+            disp('Extracting conventional features...');        
+            [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(currentDirectory, currentVolume);
+            maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea) ', (ID: ' num2str(sliceID) ')'];
+            maxTumorDiameterLabel.Text = ['Max Tumor Diameter: ' num2str(maxTumorDiameter)];
+            outerLayerInvolvementLabel.Text = ['Outer Layer Involvement: ' num2str(outerLayerInvolvement) '%'];
+        end
         mainDir = uigetdir();
         if mainDir == 0
             % User cancelled
             return;
         end
-
-        subfolders = dir(fullfile(mainDir));
+        disp('EXTRACTING CONVENTIONAL FEATURES');
+        subfolders = dir(fullfile(mainDir, 'volume_*'));
+        subfolders = subfolders([subfolders.isdir]); 
+        subfolders = subfolders(~ismember({subfolders.name}, {'.', '..'}));
         allResults = [];
         
         for i = 1:numel(subfolders)
             directory = fullfile(mainDir, subfolders(i).name);
-            
+            disp(['Conventional features extracting from ' subfolders(i).name]);
             [~, currentVolumeStr, ~] = fileparts(directory);
             volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
 
@@ -281,19 +284,15 @@ function visualizeMRI
                     count = count + numPixels;  
                 end
 
-                % Calculate outer layer involvement
-                % Assuming outer layer thickness is constant
-                outerLayerThickness = 5;
-                outerLayerPixels = outerLayerThickness * numel(mask);
-                outerLayerInvolvement = (count / outerLayerPixels) * 100;
+                
+                
+                [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvement(dir, vol, i);
+                outerLayerInvolvement = (numberOfOverLappingTumorPixels/numberOfOuterLayerPixels) * 100;
 
-                % Calculate outer layer involvement
-
-                % Store results for this volume
-                results = [results; currentVolume, i, count, maxDistance, outerLayerInvolvement];
+                results = [results; vol, i, count, maxDistance, outerLayerInvolvement];
 
             catch ME
-                disp(['Error reading mask data: ' ME.message]);
+                disp(['Error reading mask data: ' ME.message ME.stack]);
                 maxTumorArea = -1;
                 maxTumorDiameter = -1;
                 outerLayerInvolvement = -1;
@@ -306,8 +305,65 @@ function visualizeMRI
         % Find maximum values
         maxTumorArea = max(results(:, 3));
         maxTumorDiameter = max(results(:, 4));
-        outerLayerInvolvement = max(results(:, 5));
+        outerLayerInvolvement = sum(results(:, 5));
         sliceID = find(results(:, 3) == maxTumorArea, 1);
     end
 
+end
+
+function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvement(dir, vol, slice)
+
+    try
+        filename = fullfile(dir, sprintf('volume_%d_slice_%d.h5', vol, slice));
+        if ~exist(filename, 'file')
+            disp(['File not found: ' filename]);
+            throw(MException('MATLAB:FileNotFound', 'File not found'));
+        end
+    catch ME
+        disp(['File not found INVOLVEMENT(): ' ME.message]);
+    end
+
+    try
+        imageData = h5read(filename, '/image');
+        maskData = h5read(filename, '/mask');
+        se = strel('square', 3);
+        numberOfOverLappingTumorPixels = 0;
+        count = 0;
+
+
+
+
+        % Pre Processing
+        image = squeeze(imageData(1, :, :));
+        image = imbinarize(image);
+        image = bwconvhull(image, "objects");
+        
+        % Erosion
+        erImage = imerode(image, se);
+        for i = 1:4
+            erImage = imerode(erImage, se);
+        end 
+
+        % Post Processing
+        finalImage = image - erImage;
+        finalImage = imbinarize(finalImage);
+
+        numberOfOuterLayerPixels = sum(finalImage);
+        
+        
+         for i= 1:3
+             mask = squeeze(maskData(2, :, :));
+             mask = imbinarize(mask);
+             bitImage = bitand(finalImage, mask);
+             count = sum(bitImage);
+             numberOfOverLappingTumorPixels = numberOfOverLappingTumorPixels + count;            
+         end
+        % imshow(finalImage);
+    catch ME
+        disp(['Something wrong ' ME.message]);
+        numberOfOuterLayerPixels = 1;
+        numberOfOverLappingTumorPixels = 0;
+    end
+    
+    
 end
