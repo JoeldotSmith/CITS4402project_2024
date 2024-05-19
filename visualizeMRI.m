@@ -53,7 +53,8 @@ function visualizeMRI
     end
 
     function startSVM(~, ~)
-        data = readmatrix('radiomic_table_all.csv');
+        data = readtable('radiomic_table_all.csv');
+
         features = data(:, 1:end-1); 
         
         labels = data(:, end);
@@ -64,7 +65,7 @@ function visualizeMRI
         debuglabel.Text = 'SVM training completed. Now predicting.'; 
         drawnow;
         
-        test_data = readmatrix('radiomic_table_hidden.csv'); 
+        test_data = readtable('radiomic_table_hidden.csv'); 
         test_features = test_data(:, 1:end-1);
         
         predicted_labels = predict(svm_model, test_features);     
