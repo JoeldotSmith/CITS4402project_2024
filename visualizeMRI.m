@@ -56,11 +56,11 @@ function visualizeMRI
     
         data = readmatrix('conventional_features_all.csv');
         
-        features = data(:, 2:end); 
+        features = data(:, end); 
         labels = data(:, end);
 
         topLabel.Text = '';
-        debuglabel.Text = 'Starting SVM training.'; 
+        debuglabel.Text = 'Starting SVM training'; 
         drawnow;
         
         svm_model = fitcecoc(features, labels);
@@ -70,7 +70,7 @@ function visualizeMRI
         drawnow;
         
         test_data =  readmatrix('conventional_features_hidden.csv'); 
-        test_data = test_data(:, 2:end);
+        test_data = test_data(:, end);
         predicted_labels = predict(svm_model, test_data);
 
         
@@ -78,6 +78,14 @@ function visualizeMRI
         disp(['Accuracy: ' num2str(accuracy)]);
         debuglabel.Text = ['Accuracy: ' num2str(accuracy)];
 
+    end
+
+    function gliomaGrade = gradeGlioma(vol)
+        if vol > 259 && vol < 336
+            gliomaGrade = 'HHG';
+            return;
+        end
+        gliomaGrade = 'LLG';
     end
 
 
@@ -127,14 +135,15 @@ function visualizeMRI
             volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
 
             [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, ~] = calculateConventionalFeatures(directory, volume);
-            volumeResults = [volume, maxTumorArea, maxTumorDiameter, outerLayerInvolvement];
+            gliomaGrade = gradeGlioma(volume);
+            volumeResults = [volume, maxTumorArea, maxTumorDiameter, outerLayerInvolvement, gliomaGrade];
             if maxTumorArea ~= -1
                 allResults = [allResults; volumeResults];
             end
         end
 
         csvFilename = 'conventional_features.csv';
-        columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
+        columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement", 'GliomaGrade'];
         writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
         dlmwrite(csvFilename, allResults, '-append', 'Delimiter', ',');  % Append results
         topLabel.Text = 'Conventional Features';
