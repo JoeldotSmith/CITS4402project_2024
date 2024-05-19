@@ -53,38 +53,25 @@ function visualizeMRI
     end
 
     function startSVM(~, ~)
-        % Load training data
         data = readmatrix('conventional_features_all.csv');
-        
-        % Extract features (excluding the label column)
         features = data(:, 1:end-1); 
         
-        % Extract labels (last column)
         labels = data(:, end);
-        
-        % Train the SVM model using fitcecoc for multi-class classification
         svm_model = fitcecoc(features, labels);
         
-        % Display message or perform any other actions
         topLabel.Text = '';
         debuglabel.Text = 'SVM training completed. Now predicting.'; 
         drawnow;
         
-        % Load test data
         test_data = readmatrix('conventional_features_hidden.csv'); 
-        
-        % Extract features from test data
         test_features = test_data(:, 1:end-1);
         
-        % Predict labels for test data
-        predicted_labels = predict(svm_model, test_features);
-        
-        % Compare predicted labels with true labels in test data
+        predicted_labels = predict(svm_model, test_features);     
         true_labels = test_data(:, end);
+
         disp(predicted_labels);
         accuracy = sum(predicted_labels == true_labels) / numel(predicted_labels);
         
-        % Display accuracy
         disp(['Accuracy: ' num2str(accuracy)]);
         debuglabel.Text = ['Accuracy: ' num2str(accuracy)];
     end
@@ -215,7 +202,7 @@ function visualizeMRI
             outerLayerInvolvement = -1;
             sliceID = -1;
             [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, ~] = calculateConventionalFeatures(directory, volume);
-    
+            gliomaGrade = gradeGlioma(volume);
     
             selectedFeaturesS = S(:, {'LabelID', 'VolumeMesh3D', 'SurfaceAreaMesh3D', 'Sphericity3D', ...
                                      'VolumeDensityAABB_3D', 'MajorAxisLength3D', 'MinorAxisLength3D', ...
@@ -231,6 +218,7 @@ function visualizeMRI
             selectedFeaturesT.maxTumorArea = maxTumorArea;
             selectedFeaturesT.maxTumorDiameter = maxTumorDiameter;
             selectedFeaturesT.outerLayerInvolvement = outerLayerInvolvement;
+            selectedFeaturesT.gliomaGrade = gliomaGrade;
             allData = [selectedFeaturesS, selectedFeaturesI, selectedFeaturesT];
             allResults = [allResults; allData];
         end
