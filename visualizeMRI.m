@@ -44,10 +44,10 @@ function visualizeMRI
     end
     
     function startSVM(~, ~)
-        data = readtable('radiomic_table_all.csv');
+        data = readtable('radiomic_table_testData.csv');
         features = data{:, 2:end-1};
         features = normalize(features);
-        test_data = readtable('radiomic_table_hidden.csv');         
+        test_data = readtable('radiomic_table_validation.csv');         
         test_features = test_data{:, 2:end-1};        
         test_features = normalize(test_features);
         
