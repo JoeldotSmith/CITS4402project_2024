@@ -48,15 +48,22 @@ function visualizeMRI
     
     function startSVM(~, ~)
         data = readtable('radiomic_table_testData.csv');
+        test_dataVal = readtable('radiomic_table_validation.csv');         
+        testDataHidden = readtable('radiomic_table_hidden.csv');
+
+        featuresToRemove = {'SurfaceAreaMesh3D', 'MeanIntensity3D', 'IntensitySkewness3D', 'maxTumorArea'};
+        
+        data = data(:, featuresToRemove);
+        test_dataVal = test_dataVal(:, featuresToRemove);
+        testDataHidden = testDataHidden(:, featuresToRemove);
+
+        
         features = data{:, 2:end-1};
         features = normalize(features);
-        test_dataVal = readtable('radiomic_table_validation.csv');         
         testFeaturesVal = test_dataVal{:, 2:end-1};        
         testFeaturesVal = normalize(testFeaturesVal);
-        testDataHidden = readtable('radiomic_table_hidden.csv');
         testFeaturesHidden = testDataHidden{:, 2:end-1};
         testFeaturesHidden = normalize(testFeaturesHidden);
-
 
 
         labels = data{:, end};
