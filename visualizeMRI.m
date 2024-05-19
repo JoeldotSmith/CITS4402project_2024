@@ -54,19 +54,13 @@ function visualizeMRI
 
     function startSVM(~, ~)
         % Read the CSV data
-        data = readmatrix('archive/BraTS20 Training Metadata.csv');
-        
-        % List of volumes to exclude
-        excludeVolume = [175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310];
-        
-        % Filter out rows with volumes in excludeVolume
-        data_filtered = data(~ismember(data(:, 1), excludeVolume), :);
+        data = readmatrix('conventional_features.csv');
         
         % Extract features (excluding the first column which is Volume)
-        features = data_filtered(:, 2:end); % Assuming the last column is also not a feature
+        features = data(:, 2:end); % Assuming the last column is also not a feature
         
         % Extract labels (assuming the last column is the label)
-        labels = data_filtered(:, end);
+        labels = data(:, end);
         
         % Train the SVM model using fitcecoc for multi-class classification
         svm_model = fitcecoc(features, labels);
@@ -76,7 +70,13 @@ function visualizeMRI
         debuglabel.Text = 'SVM training completed.'; % Update with appropriate message
         drawnow;
         
-        % You can now use svm_model for predictions or further analysis
+        % Perform prediction on test data
+        extractConventionalFeatures();
+        test_data =  readmatrix('conventional_features.csv'); % Load test data
+        predicted_labels = predict(svm_model, test_data);
+
+
+
     end
 
 
