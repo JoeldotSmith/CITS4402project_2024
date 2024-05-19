@@ -12,6 +12,7 @@ function visualizeMRI
     sliceSlider = uislider(fig, 'Limits', [0 154], 'Position', [110 410 640 3], 'Value', 1, 'ValueChangedFcn', @updateSlice);
     conventionalButton = uibutton(fig, 'Text', 'Extract Conventional Features', 'Position', [50 350 200 30], 'ButtonPushedFcn', @extractConventionalFeatures);
     radiomicButton = uibutton(fig, 'Text', 'Extract Radiomic Features', 'Position', [300 350 200 30], 'ButtonPushedFcn', @extractRadiomicFeatures);
+    svmButton = uibutton(fig, 'Text', 'Start SVM', 'Position', [700 450 80 30], 'ButtonPushedFcn', @startSVM);
 
     % Add a UIAxes component for displaying the image
     ax = uiaxes(fig, 'Position', [100 100 600 250]);
@@ -49,6 +50,12 @@ function visualizeMRI
         currentVolume = str2double(strrep(currentVolumeStr, 'volume_', ''));
         
         updateImages(); % Update images after directory is loaded
+    end
+
+    function startSVM(~, ~)
+        % Implement functionality to start SVM analysis
+        debuglabel.Text = 'Starting SVM...';
+        drawnow;
     end
 
     function changeChannel(~, ~)
@@ -332,6 +339,8 @@ function visualizeMRI
     end
 
 end
+
+
 
 function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvement(dir, vol, slice)
 
