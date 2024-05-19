@@ -315,7 +315,7 @@ function visualizeMRI
                             end
                         end
                     end
-                    
+
                     count = count + numPixels;  
                 end
 
