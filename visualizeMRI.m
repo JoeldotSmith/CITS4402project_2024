@@ -381,6 +381,8 @@ function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvemen
              calcTumorLayer = calcTumorLayer + count;
          end
          finalImage(bitImage > 0) = max(finalImage(:)) + 1;
+         colormap(finalImage, [gray; [1 0 0]]);
+         imshow(finalImage, 'Parent', ax);
          
 
 
