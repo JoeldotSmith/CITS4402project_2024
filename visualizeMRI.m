@@ -61,6 +61,10 @@ function visualizeMRI
         
         % Extract labels (assuming the last column is the label)
         labels = data(:, 2:end);
+
+        topLabel.Text = '';
+        debuglabel.Text = 'SVM training started.'; % Update with appropriate message
+        drawnow;
         
         % Train the SVM model using fitcecoc for multi-class classification
         svm_model = fitcecoc(features, labels);
