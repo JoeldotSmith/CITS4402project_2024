@@ -70,6 +70,7 @@ function visualizeMRI
         drawnow;
         
         test_data =  readmatrix('conventional_features_hidden.csv'); 
+        test_data = test_data(:, 2:end);
         predicted_labels = predict(svm_model, test_data);
 
         
