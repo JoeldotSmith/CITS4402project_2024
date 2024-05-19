@@ -21,7 +21,7 @@ function visualizeMRI
     maxTumorDiameterLabel = uilabel(fig, 'Text', '', 'Position', [50 30 200 15]);
     outerLayerInvolvementLabel = uilabel(fig, 'Text', '', 'Position', [50 10 200 15]);
 
-    topLabel = uilabel(fig, 'Text', 'Position', [300 50 200 15]);
+    topLabel = uilabel(fig, 'Text', '', 'Position', [300 50 200 15]);
     debuglabel = uilabel(fig, 'Text', '', 'Position', [300 30 200 15]);
     debuglabel.WordWrap = 'on';
 
