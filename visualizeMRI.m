@@ -76,7 +76,7 @@ function visualizeMRI
                       'ShowPlots', false, ...
                       'Verbose', 1, ...
                       'AcquisitionFunctionName', 'expected-improvement-plus', ...
-                      'MaxObjectiveEvaluations', 100);
+                      'MaxObjectiveEvaluations', 200);
         
         % Train the SVM model using fitcecoc for multi-class classification with hyperparameter optimization
         svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', ...
@@ -101,14 +101,13 @@ function visualizeMRI
         
         % Predict labels for the test data
         predicted_labels = predict(svm_model, test_features);
-        disp(predicted_labels);
         
         % Calculate accuracy
         accuracy = sum(predicted_labels == true_labels) / numel(predicted_labels);
         
         % Display accuracy
         disp(['Accuracy: ' num2str(accuracy)]);
-        debuglabel.Text = ['Accuracy: ' num2str(accuracy)];
+        debuglabel.Text = ['Accuracy: ' num2str(accuracy*100) '%'];
     end
 
     function gliomaGrade = gradeGlioma(vol)
