@@ -53,31 +53,40 @@ function visualizeMRI
     end
 
     function startSVM(~, ~)
-    
+        % Load training data
         data = readmatrix('conventional_features_all.csv');
         
-        features = data(:, end); 
-        labels = data(:, end);
-
-        topLabel.Text = '';
-        debuglabel.Text = 'Starting SVM training'; 
-        drawnow;
+        % Extract features (excluding the label column)
+        features = data(:, 1:end-1); 
         
+        % Extract labels (last column)
+        labels = data(:, end);
+        
+        % Train the SVM model using fitcecoc for multi-class classification
         svm_model = fitcecoc(features, labels);
         
+        % Display message or perform any other actions
         topLabel.Text = '';
-        debuglabel.Text = 'SVM training completed now predicting.';
+        debuglabel.Text = 'SVM training completed. Now predicting.'; 
         drawnow;
         
-        test_data =  readmatrix('conventional_features_hidden.csv'); 
-        test_data = test_data(:, end);
-        predicted_labels = predict(svm_model, test_data);
-
+        % Load test data
+        test_data = readmatrix('conventional_features_hidden.csv'); 
         
-        accuracy = sum(predicted_labels == test_data(:, end)) / numel(predicted_labels);
+        % Extract features from test data
+        test_features = test_data(:, 1:end-1);
+        
+        % Predict labels for test data
+        predicted_labels = predict(svm_model, test_features);
+        
+        % Compare predicted labels with true labels in test data
+        true_labels = test_data(:, end);
+        disp(predicted_labels);
+        accuracy = sum(predicted_labels == true_labels) / numel(predicted_labels);
+        
+        % Display accuracy
         disp(['Accuracy: ' num2str(accuracy)]);
         debuglabel.Text = ['Accuracy: ' num2str(accuracy)];
-
     end
 
     function gliomaGrade = gradeGlioma(vol)
