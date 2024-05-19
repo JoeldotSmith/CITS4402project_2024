@@ -82,10 +82,10 @@ function visualizeMRI
 
     function gliomaGrade = gradeGlioma(vol)
         if vol > 259 && vol < 336
-            gliomaGrade = 'HHG';
+            gliomaGrade = 1;
             return;
         end
-        gliomaGrade = 'LLG';
+        gliomaGrade = 0;
     end
 
 
@@ -143,7 +143,7 @@ function visualizeMRI
         end
 
         csvFilename = 'conventional_features.csv';
-        columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement", 'GliomaGrade'];
+        columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement", 'GliomaGrade(LGG=1)'];
         writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
         dlmwrite(csvFilename, allResults, '-append', 'Delimiter', ',');  % Append results
         topLabel.Text = 'Conventional Features';
