@@ -47,12 +47,18 @@ function visualizeMRI
         data = readtable('radiomic_table_testData.csv');
         features = data{:, 2:end-1};
         features = normalize(features);
-        test_data = readtable('radiomic_table_validation.csv');         
-        test_features = test_data{:, 2:end-1};        
-        test_features = normalize(test_features);
-        
+        test_dataVal = readtable('radiomic_table_validation.csv');         
+        testFeaturesVal = test_dataVal{:, 2:end-1};        
+        testFeaturesVal = normalize(testFeaturesVal);
+        testDataHidden = readtable('radiomic_table_hidden.csv');
+        testFeaturesHidden = testDataHidden{:, 2:end-1};
+        testFeaturesHidden = normalize(testFeaturesHidden);
+
+
+
         labels = data{:, end};
-        true_labels = test_data{:, end};
+        trueLabelVal = test_dataVal{:, end};
+        trueLabelHidden = testDataHidden{:, end};
         
         topLabel.Text = '';
         debuglabel.Text = 'Starting SVM training...';
@@ -67,11 +73,15 @@ function visualizeMRI
         debuglabel.Text = 'SVM training completed. Now predicting.';
         drawnow;
         
-        predicted_labels = predict(svm_model, test_features);
+        predicted_labelsVal = predict(svm_model, testFeaturesVal);
+        predicted_labelsHidden = predict(svm_model, testFeaturesHidden);
 
-        accuracy = sum(predicted_labels == true_labels) / numel(predicted_labels);
-        disp(['Accuracy: ' num2str(accuracy)]);
-        debuglabel.Text = ['Accuracy: ' num2str(accuracy*100) '%'];
+
+        accuracyHidden = sum(predicted_labelsHidden == trueLabelHidden) / numel(predicted_labelsHidden);
+        accuracyVal = sum(predicted_labelsVal == trueLabelVal) / numel(predicted_labelsVal);
+
+        debuglabel.Text = ['Hidden Accuracy: ' num2str(accuracyHidden*100) '%'];
+        topLabel.Text = ['Validation Accuracy: ' num2str(accuracyVal*100) '%'];
     end
 
     function gliomaGrade = gradeGlioma(vol)
