@@ -53,10 +53,10 @@ function visualizeMRI
         testDataHidden = readtable('radiomic_table_hidden.csv');
     
         % Feature selection: remove less significant features
-        featuresToRemove = {'SurfaceAreaMesh3D', 'MeanIntensity3D', 'RootMeanSquare3D', 'Elongation3D', 'Flatness3D', 'IntensityKurtosis3D', 'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'IntensitySkewness3D', 'maxTumorArea'};
-        data = removevars(data, featuresToRemove);
-        test_dataVal = removevars(test_dataVal, featuresToRemove);
-        testDataHidden = removevars(testDataHidden, featuresToRemove);
+        % featuresToRemove = {'SurfaceAreaMesh3D', 'MeanIntensity3D', 'RootMeanSquare3D', 'Elongation3D', 'Flatness3D', 'IntensityKurtosis3D', 'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'IntensitySkewness3D', 'maxTumorArea'};
+        % data = removevars(data, featuresToRemove);
+        % test_dataVal = removevars(test_dataVal, featuresToRemove);
+        % testDataHidden = removevars(testDataHidden, featuresToRemove);
     
         % Extract features and labels
         features = data{:, 2:end-1};
@@ -78,10 +78,10 @@ function visualizeMRI
         cv = cvpartition(labels, 'KFold', 5);
     
         % Hyperparameter optimization options
-        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', true, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 100);
+        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', false, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 100);
     
         % Train the SVM model with hyperparameter optimization
-        svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', 'HyperparameterOptimizationOptions', opts);
+        svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'auto', 'HyperparameterOptimizationOptions', opts);
     
         % Display message after training
         topLabel.Text = '';
