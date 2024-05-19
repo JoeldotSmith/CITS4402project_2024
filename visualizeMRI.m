@@ -386,6 +386,7 @@ function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvemen
          colormap(ax2, [gray; [1 0 0]]);
          axis(ax2, 'image');
          title(ax2, 'Final Image with BitImage Overlay');
+         drawnow;
 
 
         
