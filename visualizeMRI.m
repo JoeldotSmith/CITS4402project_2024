@@ -53,23 +53,24 @@ function visualizeMRI
     end
 
     function startSVM(~, ~)
-        data = readmatrix('conventional_features_all.csv');
+        data = readmatrix('radiomic_table_all.csv');
         features = data(:, 1:end-1); 
         
         labels = data(:, end);
+        disp(data);
         svm_model = fitcecoc(features, labels);
         
         topLabel.Text = '';
         debuglabel.Text = 'SVM training completed. Now predicting.'; 
         drawnow;
         
-        test_data = readmatrix('conventional_features_hidden.csv'); 
+        test_data = readmatrix('radiomic_table_hidden.csv'); 
         test_features = test_data(:, 1:end-1);
         
         predicted_labels = predict(svm_model, test_features);     
         true_labels = test_data(:, end);
 
-        disp(predicted_labels);
+        
         accuracy = sum(predicted_labels == true_labels) / numel(predicted_labels);
         
         disp(['Accuracy: ' num2str(accuracy)]);
