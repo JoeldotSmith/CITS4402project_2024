@@ -51,7 +51,7 @@ function visualizeMRI
         test_dataVal = readtable('radiomic_table_validation.csv');         
         testDataHidden = readtable('radiomic_table_hidden.csv');
 
-        featuresToRemove = {'SurfaceAreaMesh3D', 'MeanIntensity3D', 'IntensitySkewness3D', 'maxTumorArea'};
+        featuresToRemove = {'SurfaceAreaMesh3D', 'MeanIntensity3D', 'RootMeanSquare3D', 'Elongation3D', 'Flatness3D', 'IntensityKurtosis3D', 'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'IntensitySkewness3D', 'maxTumorArea'};
         
         data = removevars(data, featuresToRemove);
         test_dataVal = removevars(test_dataVal, featuresToRemove);
