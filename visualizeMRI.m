@@ -53,27 +53,60 @@ function visualizeMRI
     end
 
     function startSVM(~, ~)
+        % Read the training data
         data = readtable('radiomic_table_all.csv');
-
-        features = data(:, 1:end-1); 
         
-        labels = data(:, end);
-        disp(data);
-        svm_model = fitcecoc(features, labels);
+        % Extract features (excluding the Volume and Label columns)
+        features = data{:, 2:end-1}; % Assuming the first column is Volume and the last column is Label
         
+        % Normalize features
+        features = normalize(features);
+        
+        % Extract labels (last column)
+        labels = data{:, end};
+        
+        % Display message indicating the start of training
         topLabel.Text = '';
-        debuglabel.Text = 'SVM training completed. Now predicting.'; 
+        debuglabel.Text = 'Starting SVM training...';
         drawnow;
         
+        % Hyperparameter tuning with cross-validation
+        cv = cvpartition(labels, 'KFold', 5); % 5-fold cross-validation
+        opts = struct('Optimizer', 'gridsearch', ...
+                      'ShowPlots', false, ...
+                      'Verbose', 1, ...
+                      'AcquisitionFunctionName', 'expected-improvement-plus', ...
+                      'MaxObjectiveEvaluations', 1000);
+        
+        % Train the SVM model using fitcecoc for multi-class classification with hyperparameter optimization
+        svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', ...
+                             'HyperparameterOptimizationOptions', opts);
+        
+        % Display message indicating training completion
+        topLabel.Text = '';
+        debuglabel.Text = 'SVM training completed. Now predicting.';
+        drawnow;
+        
+        % Read the test data
         test_data = readtable('radiomic_table_hidden.csv'); 
-        test_features = test_data(:, 1:end-1);
         
-        predicted_labels = predict(svm_model, test_features);     
-        true_labels = test_data(:, end);
-
+        % Extract features from test data (excluding the Volume and Label columns)
+        test_features = test_data{:, 2:end-1};
         
+        % Normalize test features
+        test_features = normalize(test_features);
+        
+        % Extract true labels from test data (last column)
+        true_labels = test_data{:, end};
+        
+        % Predict labels for the test data
+        predicted_labels = predict(svm_model, test_features);
+        disp(predicted_labels);
+        
+        % Calculate accuracy
         accuracy = sum(predicted_labels == true_labels) / numel(predicted_labels);
         
+        % Display accuracy
         disp(['Accuracy: ' num2str(accuracy)]);
         debuglabel.Text = ['Accuracy: ' num2str(accuracy)];
     end
