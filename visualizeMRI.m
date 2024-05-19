@@ -47,56 +47,61 @@ function visualizeMRI
     end
     
     function startSVM(~, ~)
+        % Load the data from CSV files
         data = readtable('radiomic_table_reference.csv');
-        test_dataVal = readtable('radiomic_table_validation.csv');         
+        test_dataVal = readtable('radiomic_table_validation.csv');
         testDataHidden = readtable('radiomic_table_hidden.csv');
-
+    
+        % Feature selection: remove less significant features
         featuresToRemove = {'SurfaceAreaMesh3D', 'MeanIntensity3D', 'RootMeanSquare3D', 'Elongation3D', 'Flatness3D', 'IntensityKurtosis3D', 'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'IntensitySkewness3D', 'maxTumorArea'};
-        
         data = removevars(data, featuresToRemove);
         test_dataVal = removevars(test_dataVal, featuresToRemove);
         testDataHidden = removevars(testDataHidden, featuresToRemove);
-
-        disp(data);
-        
+    
+        % Extract features and labels
         features = data{:, 2:end-1};
         features = normalize(features);
-        testFeaturesVal = test_dataVal{:, 2:end-1};        
+        testFeaturesVal = test_dataVal{:, 2:end-1};
         testFeaturesVal = normalize(testFeaturesVal);
         testFeaturesHidden = testDataHidden{:, 2:end-1};
         testFeaturesHidden = normalize(testFeaturesHidden);
-
-
         labels = data{:, end};
         trueLabelVal = test_dataVal{:, end};
         trueLabelHidden = testDataHidden{:, end};
-        
+    
+        % Display initial message
         topLabel.Text = '';
         debuglabel.Text = 'Starting SVM training...';
         drawnow;
-        
+    
+        % Cross-validation partition
         cv = cvpartition(labels, 'KFold', 5);
-        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', false, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 100);
-        
+    
+        % Hyperparameter optimization options
+        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', true, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 100);
+    
+        % Train the SVM model with hyperparameter optimization
         svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', 'HyperparameterOptimizationOptions', opts);
-
+    
+        % Display message after training
         topLabel.Text = '';
         debuglabel.Text = 'SVM training completed. Now predicting.';
         drawnow;
-        
+    
+        % Predict the labels for validation and hidden test sets
         predicted_labelsVal = predict(svm_model, testFeaturesVal);
         predicted_labelsHidden = predict(svm_model, testFeaturesHidden);
         predicted_labelsTest = predict(svm_model, features);
-        
-
-
+    
+        % Calculate accuracies
         accuracyHidden = sum(predicted_labelsHidden == trueLabelHidden) / numel(predicted_labelsHidden);
         accuracyVal = sum(predicted_labelsVal == trueLabelVal) / numel(predicted_labelsVal);
         accuracyTest = sum(predicted_labelsTest == labels) / numel(predicted_labelsTest);
-        
-        testDataPercentageLabel.Text = ['Test Accuracy: ' num2str(accuracyTest*100) '%'];
-        hiddenPercentageLabel.Text = ['Hidden Accuracy: ' num2str(accuracyHidden*100) '%'];
-        validationPercentageLabel.Text = ['Validation Accuracy: ' num2str(accuracyVal*100) '%'];
+    
+        % Display accuracies
+        testDataPercentageLabel.Text = ['Test Accuracy: ' num2str(accuracyTest * 100) '%'];
+        hiddenPercentageLabel.Text = ['Hidden Accuracy: ' num2str(accuracyHidden * 100) '%'];
+        validationPercentageLabel.Text = ['Validation Accuracy: ' num2str(accuracyVal * 100) '%'];
     end
 
     function gliomaGrade = gradeGlioma(vol)
