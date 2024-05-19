@@ -18,6 +18,9 @@ function visualizeMRI
     maxTumorAreaLabel = uilabel(fig, 'Text', '', 'Position', [50 50 200 15]);
     maxTumorDiameterLabel = uilabel(fig, 'Text', '', 'Position', [50 30 200 15]);
     outerLayerInvolvementLabel = uilabel(fig, 'Text', '', 'Position', [50 10 200 15]);
+    testDataPercentageLabel = uilabel(fig, 'Text', '', 'Position', [50 110 200 15]);
+    validationPercentageLabel = uilabel(fig, 'Text', '', 'Position', [50 90 200 15]);
+    hiddenPercentageLabel = uilabel(fig, 'Text', '', 'Position', [50 70 200 15]);
 
     topLabel = uilabel(fig, 'Text', '', 'Position', [300 50 200 15]);
     debuglabel = uilabel(fig, 'Text', '', 'Position', [300 30 200 15]);
@@ -65,7 +68,7 @@ function visualizeMRI
         drawnow;
         
         cv = cvpartition(labels, 'KFold', 5);
-        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', false, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 200);
+        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', false, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 100);
         
         svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', 'HyperparameterOptimizationOptions', opts);
 
@@ -75,13 +78,17 @@ function visualizeMRI
         
         predicted_labelsVal = predict(svm_model, testFeaturesVal);
         predicted_labelsHidden = predict(svm_model, testFeaturesHidden);
+        predicted_labelsTest = predict(svm_model, features);
+        
 
 
         accuracyHidden = sum(predicted_labelsHidden == trueLabelHidden) / numel(predicted_labelsHidden);
         accuracyVal = sum(predicted_labelsVal == trueLabelVal) / numel(predicted_labelsVal);
-
-        debuglabel.Text = ['Hidden Accuracy: ' num2str(accuracyHidden*100) '%'];
-        topLabel.Text = ['Validation Accuracy: ' num2str(accuracyVal*100) '%'];
+        accuracyTest = sum(predicted_labelsTest == labels) / numel(predicted_labelsTest);
+        
+        testDataPercentageLabel.Text = ['Test Accuracy: ' num2str(accuracyTest*100) '%'];
+        hiddenPercentageLabel.Text = ['Hidden Accuracy: ' num2str(accuracyHidden*100) '%'];
+        validationPercentageLabel.Text = ['Validation Accuracy: ' num2str(accuracyVal*100) '%'];
     end
 
     function gliomaGrade = gradeGlioma(vol)
