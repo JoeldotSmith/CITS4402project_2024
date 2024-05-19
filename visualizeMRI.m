@@ -56,6 +56,7 @@ function visualizeMRI
         data = removevars(data, featuresToRemove);
         test_dataVal = removevars(test_dataVal, featuresToRemove);
         testDataHidden = removevars(testDataHidden, featuresToRemove);
+        
 
         
         features = data{:, 2:end-1};
