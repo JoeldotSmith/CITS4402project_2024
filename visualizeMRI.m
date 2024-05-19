@@ -15,7 +15,6 @@ function visualizeMRI
 
     % Add a UIAxes component for displaying the image
     ax = uiaxes(fig, 'Position', [100 100 600 250]);
-    ax2 = uiaxes(fig, 'Position', [420 100 600 250]);
 
     % Add UI labels for displaying calculated features
     maxTumorAreaLabel = uilabel(fig, 'Text', '', 'Position', [50 50 200 15]);
@@ -382,11 +381,7 @@ function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvemen
              calcTumorLayer = calcTumorLayer + count;
          end
          finalImage(bitImage > 0) = max(finalImage(:)) + 1;
-         imagesc(ax2, finalImage);
-         colormap(ax2, [gray; [1 0 0]]);
-         axis(ax2, 'image');
-         title(ax2, 'Final Image with BitImage Overlay');
-         drawnow;
+         
 
 
         
