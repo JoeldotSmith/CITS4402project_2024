@@ -54,13 +54,19 @@ function visualizeMRI
 
     function startSVM(~, ~)
         % Read the CSV data
-        data = readmatrix('radiomic_table.csv'); % Replace 'your_data.csv' with the path to your CSV file
+        data = readmatrix('archive/BraTS20 Training Metadata.csv');
         
-        % Extract features (excluding the first column which is LabelID)
-        features = data(:, 2:end-1); % Assuming the last column is also not a feature
+        % List of volumes to exclude
+        excludeVolume = [175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310];
+        
+        % Filter out rows with volumes in excludeVolume
+        data_filtered = data(~ismember(data(:, 1), excludeVolume), :);
+        
+        % Extract features (excluding the first column which is Volume)
+        features = data_filtered(:, 2:end); % Assuming the last column is also not a feature
         
         % Extract labels (assuming the last column is the label)
-        labels = data(:, end);
+        labels = data_filtered(:, end);
         
         % Train the SVM model using fitcecoc for multi-class classification
         svm_model = fitcecoc(features, labels);
@@ -72,6 +78,7 @@ function visualizeMRI
         
         % You can now use svm_model for predictions or further analysis
     end
+
 
     function changeChannel(~, ~)
         % Implement functionality to change displayed channel
