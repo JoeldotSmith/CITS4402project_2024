@@ -53,32 +53,26 @@ function visualizeMRI
     end
 
     function startSVM(~, ~)
-        % Read the CSV data
+    
         data = readmatrix('conventional_features_all.csv');
         
-        % Extract features (excluding the first column which is Volume)
-        features = data(:, 2:end); % Assuming the last column is also not a feature
-        
-        % Extract labels (assuming the last column is the label)
+        features = data(:, 2:end); 
         labels = data(:, end);
-        
+
         topLabel.Text = '';
-        debuglabel.Text = 'SVM training completed.'; % Update with appropriate message
+        debuglabel.Text = 'Starting SVM training.'; 
         drawnow;
         
-        % Train the SVM model using fitcecoc for multi-class classification
         svm_model = fitcecoc(features, labels);
         
-        % Display message or perform any other actions
         topLabel.Text = '';
-        debuglabel.Text = 'SVM training completed.'; % Update with appropriate message
+        debuglabel.Text = 'SVM training completed now predicting.';
         drawnow;
         
-        % Perform prediction on test data
-        test_data =  readmatrix('conventional_features_hidden.csv'); % Load test data
+        test_data =  readmatrix('conventional_features_hidden.csv'); 
         predicted_labels = predict(svm_model, test_data);
 
-        % get accuracy
+        
         accuracy = sum(predicted_labels == test_data(:, end)) / numel(predicted_labels);
         disp(['Accuracy: ' num2str(accuracy)]);
         debuglabel.Text = ['Accuracy: ' num2str(accuracy)];
