@@ -53,10 +53,11 @@ function visualizeMRI
 
         featuresToRemove = {'SurfaceAreaMesh3D', 'MeanIntensity3D', 'IntensitySkewness3D', 'maxTumorArea'};
         
-        data = data(:, featuresToRemove);
-        test_dataVal = test_dataVal(:, featuresToRemove);
-        testDataHidden = testDataHidden(:, featuresToRemove);
+        data = removevars(data, featuresToRemove);
+        test_dataVal = removevars(test_dataVal, featuresToRemove);
+        testDataHidden = removevars(testDataHidden, featuresToRemove);
 
+        disp(data);
         
         features = data{:, 2:end-1};
         features = normalize(features);
