@@ -57,13 +57,13 @@ function visualizeMRI
         data = readmatrix('conventional_features_all.csv');
         
         % Extract features (excluding the first column which is Volume)
-        features = data(:, 2:end);
+        features = data(:, 2:end); % Assuming the last column is also not a feature
         
         % Extract labels (assuming the last column is the label)
-        labels = data(:, 2:end);
-
+        labels = data(:, end);
+        
         topLabel.Text = '';
-        debuglabel.Text = 'SVM training started.'; % Update with appropriate message
+        debuglabel.Text = 'SVM training completed.'; % Update with appropriate message
         drawnow;
         
         % Train the SVM model using fitcecoc for multi-class classification
