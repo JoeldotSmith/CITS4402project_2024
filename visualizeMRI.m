@@ -21,6 +21,9 @@ function visualizeMRI
     maxTumorDiameterLabel = uilabel(fig, 'Text', '', 'Position', [50 30 200 15]);
     outerLayerInvolvementLabel = uilabel(fig, 'Text', '', 'Position', [50 10 200 15]);
 
+    debuglabel = uilabel(fig, 'Text', '', 'Position', [300 50 200 15]);
+    debuglabel.WordWrap = 'on';
+
     % Define variables
     currentDirectory = '';
     currentChannel = 'T1';
@@ -62,7 +65,8 @@ function visualizeMRI
 
     function extractConventionalFeatures(~, ~)
         if currentVolume ~= -1
-            disp('Extracting conventional features...');        
+            debuglabel.Text = 'Extracting conventional features...';
+            drawnow;
             [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(currentDirectory, currentVolume);
             maxTumorAreaLabel.Text = ['Max Tumor Area: ' num2str(maxTumorArea) ', (ID: ' num2str(sliceID) ')'];
             maxTumorDiameterLabel.Text = ['Max Tumor Diameter: ' num2str(maxTumorDiameter)];
@@ -70,10 +74,12 @@ function visualizeMRI
         end
         mainDir = uigetdir();
         if mainDir == 0
-            % User cancelled
+            debuglabel.Text = 'User cancelled extraction';
+            drawnow;
             return;
         end
-        disp('EXTRACTING CONVENTIONAL FEATURES');
+        debuglabel.Text = 'EXTRACTING CONVENTIONAL FEATURES';
+        drawnow;
         subfolders = dir(fullfile(mainDir, 'volume_*'));
         subfolders = subfolders([subfolders.isdir]); 
         subfolders = subfolders(~ismember({subfolders.name}, {'.', '..'}));
@@ -81,7 +87,8 @@ function visualizeMRI
         
         for i = 1:numel(subfolders)
             directory = fullfile(mainDir, subfolders(i).name);
-            disp(['Conventional features extracting from ' subfolders(i).name]);
+            debuglabel.Text = ['Conventional features extracting from ' subfolders(i).name];
+            drawnow;
             [~, currentVolumeStr, ~] = fileparts(directory);
             volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
 
@@ -96,7 +103,8 @@ function visualizeMRI
         columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement"];
         writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
         dlmwrite(csvFilename, allResults, '-append', 'Delimiter', ',');  % Append results
-        disp(['Conventional features saved to ' csvFilename]);
+        debuglabel.Text = ['Conventional features saved to ' csvFilename];
+        drawnow;
 
 
 
@@ -118,10 +126,12 @@ function visualizeMRI
     function extractRadiomicFeatures(~, ~)
         mainDir = uigetdir();
         if mainDir == 0
-            % User cancelled
+            debuglabel.Text = 'User cancelled extraction';
+            drawnow;
             return;
         end
-        disp('EXTRACTING RADIOMIC FEATURES');
+        debuglabel.Text = 'EXTRACTING RADIOMIC FEATURES';
+        drawnow;
         subfolders = dir(fullfile(mainDir, 'volume_*'));
         subfolders = subfolders([subfolders.isdir]); 
         subfolders = subfolders(~ismember({subfolders.name}, {'.', '..'}));
@@ -131,7 +141,8 @@ function visualizeMRI
 
 
             directory = fullfile(mainDir, subfolders(i).name);
-            disp(['Radiomic features extracting from ' subfolders(i).name]);
+            debuglabel.Text = ['Extracting from ' subfolders(i).name];
+            drawnow;
             [~, currentVolumeStr, ~] = fileparts(directory);
             volume = str2double(strrep(currentVolumeStr, 'volume_', ''));
             
@@ -174,7 +185,8 @@ function visualizeMRI
         % Write selected features to CSV
         
         writetable(allResults, 'radiomic_table.csv');
-        disp(['Radiomic features saved as radiomic_features.csv']);
+        debuglabel.Text = 'Saved as radiomic_features.csv';
+        drawnow;
     end
 
 
