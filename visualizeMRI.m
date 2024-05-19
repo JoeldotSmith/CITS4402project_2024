@@ -75,8 +75,7 @@ function visualizeMRI
         drawnow;
         
         % Perform prediction on test data
-        extractConventionalFeatures();
-        test_data =  readmatrix('conventional_features.csv'); % Load test data
+        test_data =  readmatrix('conventional_features_hidden.csv'); % Load test data
         predicted_labels = predict(svm_model, test_data);
 
         % get accuracy
