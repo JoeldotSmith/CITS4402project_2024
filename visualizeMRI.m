@@ -1,8 +1,7 @@
 function visualizeMRI
-    % Create the main figure window
+    
     fig = uifigure('Name', 'MRI Analyzer', 'Position', [100 100 800 500]);
 
-    % Create UI components
     loadDirButton = uibutton(fig, 'Text', 'Load Slice Directory', 'Position', [50 450 150 30], 'ButtonPushedFcn', @loadSliceDirectory); %#ok<*NASGU>
     channelDropdownLabel = uilabel(fig, 'Text', 'Channel:', 'Position', [250 480 60 15]);
     channelDropdown = uidropdown(fig, 'Items', {'T1', 'T1Gd', 'T2', 'T2-FLAIR'}, 'Position', [250 450 100 30], 'ValueChangedFcn', @changeChannel);
@@ -14,10 +13,8 @@ function visualizeMRI
     radiomicButton = uibutton(fig, 'Text', 'Extract Radiomic Features', 'Position', [300 350 200 30], 'ButtonPushedFcn', @extractRadiomicFeatures);
     svmButton = uibutton(fig, 'Text', 'Start SVM', 'Position', [700 450 80 30], 'ButtonPushedFcn', @startSVM);
 
-    % Add a UIAxes component for displaying the image
     ax = uiaxes(fig, 'Position', [100 100 600 250]);
 
-    % Add UI labels for displaying calculated features
     maxTumorAreaLabel = uilabel(fig, 'Text', '', 'Position', [50 50 200 15]);
     maxTumorDiameterLabel = uilabel(fig, 'Text', '', 'Position', [50 30 200 15]);
     outerLayerInvolvementLabel = uilabel(fig, 'Text', '', 'Position', [50 10 200 15]);
@@ -25,39 +22,37 @@ function visualizeMRI
     topLabel = uilabel(fig, 'Text', '', 'Position', [300 50 200 15]);
     debuglabel = uilabel(fig, 'Text', '', 'Position', [300 30 200 15]);
     debuglabel.WordWrap = 'on';
-
-    % Define variables
+    
     currentDirectory = '';
     currentChannel = 'T1';
     currentSlice = 1;
-    currentVolume = -1;  % Initialize currentVolume
+    currentVolume = -1; 
 
-    % Callback functions
     function loadSliceDirectory(~, ~)
-        % Implement functionality to load directory
         directory = uigetdir();
         if directory == 0
-            % User cancelled
             return;
         end
-        
-        % Process the directory
+
         disp(['Selected directory: ' directory]);
         currentDirectory = directory;
-        
-        % Extract volume number from the directory name
+
         [~, currentVolumeStr, ~] = fileparts(directory);
         currentVolume = str2double(strrep(currentVolumeStr, 'volume_', ''));
         
-        updateImages(); % Update images after directory is loaded
+        updateImages(); 
     end
-
+    
     function startSVM(~, ~)
         data = readtable('radiomic_table_all.csv');
         features = data{:, 2:end-1};
         features = normalize(features);
+        test_data = readtable('radiomic_table_hidden.csv');         
+        test_features = test_data{:, 2:end-1};        
+        test_features = normalize(test_features);
         
         labels = data{:, end};
+        true_labels = test_data{:, end};
         
         topLabel.Text = '';
         debuglabel.Text = 'Starting SVM training...';
@@ -70,27 +65,16 @@ function visualizeMRI
                       'AcquisitionFunctionName', 'expected-improvement-plus', ...
                       'MaxObjectiveEvaluations', 200);
         
-        svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', ...
-                             'HyperparameterOptimizationOptions', opts);
-        
+                      svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', ...
+                          'HyperparameterOptimizationOptions', opts);
+
         topLabel.Text = '';
         debuglabel.Text = 'SVM training completed. Now predicting.';
         drawnow;
         
-        test_data = readtable('radiomic_table_hidden.csv');         
-        test_features = test_data{:, 2:end-1};        
-        test_features = normalize(test_features);
-        
-        % Extract true labels from test data (last column)
-        true_labels = test_data{:, end};
-        
-        % Predict labels for the test data
         predicted_labels = predict(svm_model, test_features);
-        
-        % Calculate accuracy
+
         accuracy = sum(predicted_labels == true_labels) / numel(predicted_labels);
-        
-        % Display accuracy
         disp(['Accuracy: ' num2str(accuracy)]);
         debuglabel.Text = ['Accuracy: ' num2str(accuracy*100) '%'];
     end
@@ -105,14 +89,12 @@ function visualizeMRI
 
 
     function changeChannel(~, ~)
-        % Implement functionality to change displayed channel
         currentChannel = channelDropdown.Value;
         disp(['Channel changed to: ' currentChannel]);
         updateImages();
     end
 
     function toggleAnnotation(~, ~)
-        % Implement functionality to toggle tumor annotation
         disp('Annotation toggled');
         updateImages();
     end
@@ -159,14 +141,11 @@ function visualizeMRI
 
         csvFilename = 'conventional_features.csv';
         columnTitles = ["Volume", "TumorArea", "TumorDiameter", "OuterLayerInvolvement", 'GliomaGrade(LGG=1)'];
-        writematrix(columnTitles, csvFilename, 'Delimiter', ',');  % Write column titles
-        dlmwrite(csvFilename, allResults, '-append', 'Delimiter', ',');  % Append results
+        writematrix(columnTitles, csvFilename, 'Delimiter', ',');
+        dlmwrite(csvFilename, allResults, '-append', 'Delimiter', ','); 
         topLabel.Text = 'Conventional Features';
         debuglabel.Text = ['saved to ' csvFilename];
         drawnow;
-
-
-
     end
 
     function convertH5toNii(directory, type, name)
@@ -242,11 +221,6 @@ function visualizeMRI
             allResults = [allResults; allData];
         end
         
-        
-        
-    
-        % Write selected features to CSV
-        
         writetable(allResults, 'radiomic_table.csv');
         topLabel.Text = 'Radiomic Features saved';
         debuglabel.Text = 'as radiomic_features.csv';
@@ -267,15 +241,13 @@ function visualizeMRI
         end
     
         try
-            % Read the image data from the HDF5 file
             imageData = h5read(filename, '/image');
-            maskData = h5read(filename, '/mask'); % Load mask data
+            maskData = h5read(filename, '/mask');
+            colors = {'r', 'g', 'b'};
     
-            % Display the size and class of the loaded image data
             disp(['Loaded image data size: ' num2str(size(imageData))]);
             disp(['Image data class: ' class(imageData)]);
     
-            % Display the selected channel in the UIAxes
             channelIndex = getChannelIndex(currentChannel);
             imagesc(ax, squeeze(imageData(channelIndex, :, :)));
             colormap(ax, gray);
@@ -283,10 +255,7 @@ function visualizeMRI
             hold(ax, 'on'); 
             
     
-            colors = {'r', 'g', 'b'};
             
-    
-            % Overlay masks on the image
             if strcmp(annotationDropdown.Value, 'On')
                 for i = 1:numel(colors)
                     try
@@ -299,12 +268,14 @@ function visualizeMRI
             end
 
 
-            hold(ax, 'off'); % Release the hold on the current axes
+            hold(ax, 'off');
             channelIndex = channelIndex - 1;
             if channelIndex == 0
                 channelIndex = 4;
             end
+
             title(ax, ['Channel ' num2str(channelIndex)]);
+            
         catch ME
             disp(['Error reading HDF5 file: ' ME.message]);
             return;
@@ -312,12 +283,10 @@ function visualizeMRI
     end
 
     function index = getChannelIndex(channel)
-        % Define channel indices
         channelIndices = containers.Map({'T2-FLAIR', 'T1', 'T1Gd', 'T2'}, {1, 2, 3, 4});
         index = channelIndices(channel);
     end
 
-    % Callback function to update slice value
     function updateSlice(src, ~)
         currentSlice = round(src.Value);
         disp(['Slice changed to: ' num2str(currentSlice)]);
@@ -325,7 +294,6 @@ function visualizeMRI
     end
 
     function [maxTumorArea, maxTumorDiameter, outerLayerInvolvement, sliceID] = calculateConventionalFeatures(dir, vol)
-        % Initialize variables to store results for all volumes
         results = [];
         outerLayerThickness = 5;
 
@@ -341,13 +309,11 @@ function visualizeMRI
                 count = 0;
                 maxDistance = 0;
 
-                % gets Max area of tumor with slice ID
                 for j = 1:3
                     mask = squeeze(maskData(j, :, :));
-                    [rows, cols] = find(mask);  % Get x/y coordinates of tumor pixels
+                    [rows, cols] = find(mask);
                     numPixels = numel(rows);
 
-                    % Calculate maximum tumor diameter by finding the furthest apart pixels
                     for k = 1:numPixels
                         for l = (k + 1):numPixels
                             distance = sqrt((rows(k) - rows(l))^2 + (cols(k) - cols(l))^2);
@@ -376,8 +342,6 @@ function visualizeMRI
             end
         end
         
-
-        % Find maximum values
         maxTumorArea = max(results(:, 3));
         maxTumorDiameter = max(results(:, 4));
         totalOuterLayerPixels = sum(results(:, 5));
@@ -385,7 +349,6 @@ function visualizeMRI
         outerLayerInvolvement = (totalTumorLayerPixels/totalOuterLayerPixels) * 100;
         sliceID = find(results(:, 3) == maxTumorArea, 1);
     end
-
 end
 
 
@@ -405,47 +368,38 @@ function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvemen
     try
         calcOuterLayer = 0;
         calcTumorLayer = 0;
+        count = 0;
         imageData = h5read(filename, '/image');
         maskData = h5read(filename, '/mask');
         se = strel('square', 3);
 
-        count = 0;
 
-        % Pre Processing
         image = squeeze(imageData(1, :, :));
         image = imbinarize(image);
         imageS = bwconvhull(image, "objects");
         
-        % Erosion
         erImage = imerode(imageS, se);
         for i = 1:5
             erImage = imerode(erImage, se);
         end 
 
-        % Post Processing
         finalImage = image - erImage;
         finalImage = imbinarize(finalImage);
         
 
-        calcOuterLayer = sum(finalImage(:));
-        
-        
-         for i= 1:3
-             mask = squeeze(maskData(i, :, :));
-             mask = imbinarize(mask);
-             bitImage = bitand(finalImage, mask);
-             count = sum(bitImage(:));
-             calcTumorLayer = calcTumorLayer + count;
-         end
-         
-        
+        calcOuterLayer = sum(finalImage(:));        
+        for i= 1:3
+            mask = squeeze(maskData(i, :, :));
+            mask = imbinarize(mask);
+            bitImage = bitand(finalImage, mask);
+            count = sum(bitImage(:));
+            calcTumorLayer = calcTumorLayer + count;
+        end
     catch ME
         disp(['Something wrong ' ME.message]);
         calcOuterLayer = 1;
         calcTumorLayer = 1;
     end
     numberOfOuterLayerPixels = calcOuterLayer;
-    numberOfOverLappingTumorPixels = calcTumorLayer;
-    
-    
+    numberOfOverLappingTumorPixels = calcTumorLayer; 
 end
