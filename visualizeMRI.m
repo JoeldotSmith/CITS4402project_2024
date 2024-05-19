@@ -2,7 +2,7 @@ function visualizeMRI
     
     fig = uifigure('Name', 'MRI Analyzer', 'Position', [100 100 800 500]);
 
-    loadDirButton = uibutton(fig, 'Text', 'Load Slice Directory', 'Position', [50 450 150 30], 'ButtonPushedFcn', @loadSliceDirectory); %#ok<*NASGU>
+    loadDirButton = uibutton(fig, 'Text', 'Load Slice Directory', 'Position', [50 450 150 30], 'ButtonPushedFcn', @loadSliceDirectory);
     channelDropdownLabel = uilabel(fig, 'Text', 'Channel:', 'Position', [250 480 60 15]);
     channelDropdown = uidropdown(fig, 'Items', {'T1', 'T1Gd', 'T2', 'T2-FLAIR'}, 'Position', [250 450 100 30], 'ValueChangedFcn', @changeChannel);
     annotationDropdownLabel = uilabel(fig, 'Text', 'Annotation:', 'Position', [400 480 80 15]);
@@ -65,8 +65,7 @@ function visualizeMRI
                       'AcquisitionFunctionName', 'expected-improvement-plus', ...
                       'MaxObjectiveEvaluations', 200);
         
-                      svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', ...
-                          'HyperparameterOptimizationOptions', opts);
+        svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', 'HyperparameterOptimizationOptions', opts);
 
         topLabel.Text = '';
         debuglabel.Text = 'SVM training completed. Now predicting.';
@@ -178,8 +177,6 @@ function visualizeMRI
         allResults = [];
 
         for i = 1:numel(subfolders)
-
-
             directory = fullfile(mainDir, subfolders(i).name);
             topLabel.Text = 'Extracting Radiomic Features';
             debuglabel.Text = ['from ' subfolders(i).name];
@@ -211,7 +208,7 @@ function visualizeMRI
             selectedFeaturesT = T(:, {'JointEntropyAveraged3D', 'AngularSecondMomentAveraged3D', 'ContrastAveraged3D', 'DissimilarityAveraged3D', ...
                                      'ClusterTendencyAveraged3D', 'ClusterShadeAveraged3D', 'ClusterProminenceAveraged3D', ...
                                      'InverseDifferenceAveraged3D', 'CorrelationAveraged3D', 'AutoCorrelationAveraged3D'});
-            % Add 'Volume' column to each table
+
             selectedFeaturesS.LabelID = volume;
             selectedFeaturesT.maxTumorArea = maxTumorArea;
             selectedFeaturesT.maxTumorDiameter = maxTumorDiameter;
