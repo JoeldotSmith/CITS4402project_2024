@@ -57,10 +57,10 @@ function visualizeMRI
         data = readmatrix('conventional_features_all.csv');
         
         % Extract features (excluding the first column which is Volume)
-        features = data(:, 2:end); % Assuming the last column is also not a feature
+        features = data(:, 2:end);
         
         % Extract labels (assuming the last column is the label)
-        labels = data(:, end);
+        labels = data(:, 2:end);
         
         % Train the SVM model using fitcecoc for multi-class classification
         svm_model = fitcecoc(features, labels);
