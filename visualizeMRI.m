@@ -53,9 +53,24 @@ function visualizeMRI
     end
 
     function startSVM(~, ~)
-        % Implement functionality to start SVM analysis
-        debuglabel.Text = 'Starting SVM...';
+        % Read the CSV data
+        data = readmatrix('radiomic_table.csv'); % Replace 'your_data.csv' with the path to your CSV file
+        
+        % Extract features (excluding the first column which is LabelID)
+        features = data(:, 2:end-1); % Assuming the last column is also not a feature
+        
+        % Extract labels (assuming the last column is the label)
+        labels = data(:, end);
+        
+        % Train the SVM model using fitcecoc for multi-class classification
+        svm_model = fitcecoc(features, labels);
+        
+        % Display message or perform any other actions
+        topLabel.Text = '';
+        debuglabel.Text = 'SVM training completed.'; % Update with appropriate message
         drawnow;
+        
+        % You can now use svm_model for predictions or further analysis
     end
 
     function changeChannel(~, ~)
