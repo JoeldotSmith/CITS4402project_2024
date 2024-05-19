@@ -54,7 +54,7 @@ function visualizeMRI
 
     function startSVM(~, ~)
         % Read the CSV data
-        data = readmatrix('conventional_features.csv');
+        data = readmatrix('conventional_features_all.csv');
         
         % Extract features (excluding the first column which is Volume)
         features = data(:, 2:end); % Assuming the last column is also not a feature
@@ -75,7 +75,10 @@ function visualizeMRI
         test_data =  readmatrix('conventional_features.csv'); % Load test data
         predicted_labels = predict(svm_model, test_data);
 
-
+        % get accuracy
+        accuracy = sum(predicted_labels == test_data(:, end)) / numel(predicted_labels);
+        disp(['Accuracy: ' num2str(accuracy)]);
+        debuglabel.Text = ['Accuracy: ' num2str(accuracy)];
 
     end
 
