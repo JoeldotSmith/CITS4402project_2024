@@ -48,12 +48,13 @@ The dataset contains the following features extracted from the images.
 
 The first column *LabelID* is the volume number and is ignored and the last column, *gliomaGrade* is the target.
 ## Accuracy of the model
+We ran the SVM 10 times then averaged the result to ensure reliability of result
 ### Training accuracy
-
+The SVM was 89.971% accurate on the test dataset
 ### Validation accuracy
-
+The SVM was 82.3% accurate on the validation dataset
 ### Testing accuracy
-
+The SVM was 67% accurate on the hidden dataset
 
 ## Accuracy regarding to feature selection
 
