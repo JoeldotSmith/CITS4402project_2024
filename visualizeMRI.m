@@ -76,7 +76,7 @@ function visualizeMRI
         drawnow;
         
         cv = cvpartition(labels, 'KFold', 5);
-        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', false, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 500);
+        opts = struct('Optimizer', 'gridsearch', 'ShowPlots', false, 'Verbose', 1, 'AcquisitionFunctionName', 'expected-improvement-plus', 'MaxObjectiveEvaluations', 100);
         
         svm_model = fitcecoc(features, labels, 'OptimizeHyperparameters', 'all', 'HyperparameterOptimizationOptions', opts);
 
