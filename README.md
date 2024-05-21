@@ -58,4 +58,9 @@ The SVM was 67% accurate on the hidden dataset
 
 ## Accuracy regarding to feature selection
 
+
+
+
+
+
 ## Challenges encountered during the classification process
