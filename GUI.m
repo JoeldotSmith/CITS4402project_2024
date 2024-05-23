@@ -384,7 +384,7 @@ function [numberOfOuterLayerPixels, numberOfOverLappingTumorPixels] = involvemen
     end
 
     try
-        calcOuterLayer = 0;
+        calcOuterLayer = 0; %#ok<*NASGU>
         calcTumorLayer = 0;
         count = 0;
         imageData = h5read(filename, '/image');
