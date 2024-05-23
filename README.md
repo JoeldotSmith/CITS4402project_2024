@@ -56,11 +56,7 @@ The SVM was 82.3% accurate on the validation dataset
 ### Testing accuracy
 The SVM was 67% accurate on the hidden dataset
 
-## Accuracy regarding to feature selection
-
-
-
-
-
-
 ## Challenges encountered during the classification process
+A massive challenge we encountered was that the data had a massive inbalance of high grade glioma and low grade gliomas. The data has a lot more high grade glioma compared to low grade glioma, this causes issues with the SVM learning as it baised towards high grade glioma guesses. This means that when trying to guess the glioma grade in a perfect dataset such as the hidden dataset which is a 50/50 split in high grade gliomas and low grade gliomas. 
+
+There are solutions to mitigate these problems such as transforming the dataset so that there is a 50/50 split in classification. However doing this removes too much data to learn from and the SVM struggles. Another solution would be to have a massive dataset so it can learn very accuratly what a low grade glioma and a high grade glioma means, this is a problem for us however as it would take a long time to learn from and we also do not have access to a dataset big enough to learn from. An approach we were told in during our presentation was to duplicate and or slightly change the smaller low grade glioma dataset so that we had enough data to learn from. 
