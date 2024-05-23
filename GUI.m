@@ -1,4 +1,4 @@
-function visualizeMRI
+function GUI
     
     fig = uifigure('Name', 'MRI Analyzer', 'Position', [100 100 800 500]);
 
