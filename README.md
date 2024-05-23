@@ -1,4 +1,7 @@
 # SVM Classification Model
+Joel Smith 23338559
+Bennett Nicholson 23368495
+Anthony Gray 23334769
 ## Data partition
 The data is split into three parts
 - Test Data, data to learn from
